@@ -4,16 +4,23 @@
 ;;;;;;;;;;;;;
 
 
-
+;;
+;  go (one iteration)
+;
+;;
 to go
-
+  
+  profiler:reset
+  profiler:start
+  
+  
   ;; transportation : flows in network
   transport
 
   ;; land-use : localisation of residence and work
   land-use
   displayActifs
-  tick
+  ;tick
   
   ;; recompute transportation
   transport
@@ -21,5 +28,10 @@ to go
   ;; governance : grow network
   gouvernement
 
+  ; tick at end of iteration
+  tick
+  
+  profiler:stop
+  pie-plot (list profiler:inclusive-time "transport" profiler:inclusive-time "land-use" profiler:inclusive-time "dijkstra") "profiler" [red blue green]
 
 end
