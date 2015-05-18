@@ -8,7 +8,7 @@
 ;;   
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix]
+extensions[matrix table]
 
 __includes [
   
@@ -25,7 +25,12 @@ __includes [
   ; mayors
   "mayor.nls"
   
-
+  ;;;;;;;;;
+  ; functions
+  ;;;;;;;;;
+  
+  ; functions to update distance matrices
+  "distances.nls"
   
   ;;;;;;;;;;
   ; display
@@ -34,8 +39,15 @@ __includes [
   "display.nls"
   
   
+  ;;;;;;;;;;
+  ;; utils
+  ;;;;;;;;;;
   
+  ; temp path
+  "/Users/Juste/Documents/ComplexSystems/Softwares/NetLogo/utils/math/SpatialKernels.nls"
   
+  "utils/misc/List.nls"
+  "utils/misc/Types.nls"
 ]
 
 
@@ -43,8 +55,16 @@ __includes [
 
 globals[
   
+  ;;;;;;;;;;;;;
+  ;; Setup params
+  ;;;;;;;;;;;;;
+  
   ; initial number of territories
   ;#-initial-territories
+  
+  ; spatial distribution params
+  ;actives-spatial-dispersion
+  ;employments-spatial-distribution
   
   
   ;;;;;;;;;;;;;
@@ -165,7 +185,7 @@ CHOOSER
 patches-display
 patches-display
 "governance" "actives" "employments"
-0
+2
 
 TEXTBOX
 11
@@ -186,6 +206,66 @@ Runtime parameters
 11
 0.0
 1
+
+SLIDER
+9
+62
+184
+95
+actives-spatial-dispersion
+actives-spatial-dispersion
+0
+100
+5
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+8
+96
+184
+129
+employments-spatial-dispersion
+employments-spatial-dispersion
+0
+100
+5
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+185
+62
+294
+95
+actives-max
+actives-max
+0
+1000
+500
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+184
+96
+294
+129
+employments-max
+employments-max
+0
+1000
+500
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

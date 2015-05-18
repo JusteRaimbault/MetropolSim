@@ -9,7 +9,12 @@ to color-patches
      ask patches [set pcolor [color] of governing-mayor]
   ]
   if patches-display = "actives"[
-     ask patches [set pcolor [color] of governing-mayor]
+     let mi min [actives] of patches let ma max [actives] of patches
+     ask patches [set pcolor scale-color green actives mi ma]
+  ]
+  if patches-display = "employments"[
+     let mi min [actives] of patches let ma max [employments] of patches
+     ask patches [set pcolor scale-color green employments mi ma]
   ]
   
 end

@@ -1,0 +1,31 @@
+
+;;;;;;;;;;;;;;;
+;; distances.nls
+;;;;;;;;;;;;;;;
+
+
+
+;;
+;  Given euclidian and network distance matrices, computes effective distance matrix
+;
+;  uses the fact that distance matrix is sparse
+to update-effective-distance-matrix
+   ;; 
+   ; d_eff = min(d_e,min_{l,l'}(d_e(i,l)+d_n(l,l')+d_e(l',j))
+   ;
+   ; if network is not pathologic, we can make the approximation d_e(i,l_min)+d_n(l_min,l'_min)+d_e(l'_min,j)
+   ;  (counter examples exist)
+   ;
+   ; uses boolean matrix to get network patches ? or keep them in a variable ?
+   let dmax sqrt ((world-width) ^ 2 + (world-height) ^ 2) let N count patches
+   let d-to-nw-patches matrix:times-element-wise (matrix:map [bool-to-int (?1 <= dmax)] network-distance-matrix) euclidian-distance-matrix
+   
+   ;optimization : contruct a table giving index of nearest nw patch
+   let nw-access-table table:make let i 0
+   repeat n [ set i i + 1]
+   
+   
+   
+end
+
+

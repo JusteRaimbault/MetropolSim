@@ -16,7 +16,14 @@ to setup
   ; setup initial configuration
   setup-initial-distributions
   
+  ; setup initial network
+  setup-initial-network
   
+  ; cached distances
+  setup-cached-distances
+  
+  ; display
+  setup-display
   
 end
 
@@ -44,12 +51,63 @@ end
 to setup-initial-distributions
   
   ; use monocentric kernel application function
-  ask mayors [
-    apply-monocentric-kernel "poisson" kernel-dispersion kernel-max "actives" patch-here
-    apply-monocentric-kernel "poisson" kernel-dispersion kernel-max "employments" patch-here
+  let centers [patch-here] of mayors
+  foreach centers [
+    apply-monocentric-kernel "poisson" actives-spatial-dispersion actives-max "actives" ?
+    apply-monocentric-kernel "poisson" employments-spatial-dispersion employments-max "employments" ?
   ]
   
   
+  
 end
+
+;;
+; Setup display
+to setup-display
+  color-patches
+end
+
+
+;;
+; Initial network
+;
+;  - no nw for now ? -
+to setup-initial-network
+  
+end
+
+
+;;
+; Cached distances : initialize matrices
+;
+to setup-cached-distances
+  
+  let N count patches
+  let dmax sqrt ((world-width ^ 2) + (world-height ^ 2))  
+  
+  ; euclidian distance matrix
+  set euclidian-distance-matrix matrix:make-constant N N 0
+  let p1 0 let p2 0
+  repeat n [
+     set p2 0
+     repeat n [
+        let x1 (floor (p1 / world-width)) - min-pxcor let y1 (p1 - floor (p1 / world-height)) - min-pycor
+        let x2 (floor (p2 / world-width)) - min-pxcor let y2 (p2 - floor (p2 / world-height)) - min-pycor
+        matrix:set euclidian-distance-matrix p1 p2 sqrt ((x1 - x2) ^ 2 + (y1 + y2) ^ 2) 
+        set p2 p2 + 1
+     ]
+     set p1 p1 + 1
+  ]
+  
+  ; initialize at infty = dmax + 1
+  set network-distance-matrix matrix:make-constant N N (dmax + 1)
+  ; in the case of no network, effective distance is euclidian
+  ;set effective-distance-matrix matrix:copy euclidian-distance-matrix
+  ; use generic function
+  update-effective-distance-matrix
+  
+  
+end
+
 
 
