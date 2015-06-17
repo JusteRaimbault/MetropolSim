@@ -26,6 +26,7 @@ to updateDeplacementsDomicileTravail
   
   distributionGravitaire
   
+  ; convergence in 2 iterations ?
   repeat 2 [
     let c 0
     ;for each csp
@@ -42,6 +43,7 @@ to updateDeplacementsDomicileTravail
   choixModal
   
   ;; flow affectation in network
+  ; : balancing algo to obtain wardrop ?
   while [j < 4] [
     affectation j
     updateLinksSpeed
@@ -55,9 +57,13 @@ end
 
 
 
-
+;;
+; gravital distribution of fluxs ?
+;
+;  -> initialize listNavettesPatches as [[]_csp1,...,[]_cspK]
 to distributionGravitaire
 let i 0
+; for each patch
 while [i < length listPatchesRegion] [
   ask item i listPatchesRegion [
     ;set listNavettesPatches [[]]
@@ -105,9 +111,14 @@ while [i < length listPatchesRegion] [
       
         set m m + 1
       ]
+      
+      ;
     
+     ; \sum_m A_i E_j
     
       set temp temp + (item k list-A-nbr-R + item k list-A-nbr-M) * (item k [list-E-nbr] of item j listPatchesRegion) * minCout
+      ; temp = temp + A_i*E_j*cout _ for all j
+      
         set listNavettesPatches replace-item k listNavettesPatches lput temp item k listNavettesPatches
         ;;;;;show "listNavettesPatches"
         ;;;;;show listNavettesPatches
@@ -148,6 +159,8 @@ while [i < length listPatchesRegion] [
 
 end
 
+;; furness :
+;  - compute \sum_{j}{\phi_ij} as listNavettesPatches
 
 
 to furnessEmplois  [csp]
@@ -309,51 +322,69 @@ end
 
 
 
+;;;
+;; Wardrop affectation ?
+;;
+;; Does not reaffect trajectories !
+;;;
 
 to affectation [nIter]
+  
 ask links [
-
-set utilisation_temp utilisation_l * (nIter - 1) * (1 - 1 /(nIter))
-set utilisation_l 0
+ 
+  ; congestion only in links, not in virtual network.
+ 
+  set utilisation_temp utilisation_l * (nIter - 1) * (1 - 1 /(nIter))
+  set utilisation_l 0
 ]
+
+
+
 let k 0
 while [k < length listPatchesRegion]
-[
-ask item k listPatchesRegion [
-let i 0
-let tempC 0
-let temp 0
-;let tempP self
-while [i < length listPatchesRegion] [
+  [
+  ask item k listPatchesRegion [
+  let i 0
+  let tempC 0
+  let temp 0
+  ;let tempP self
+  while [i < length listPatchesRegion] [
+
+  ;; flow k--> i
 
 
   let m 0
+  ; for each mode
   while [m < nModes] [
-    if item m listChemins != [] [
+      if item m listChemins != [] [
       
-;      ;;;;;;;show item m listChemins
-;      ;;;;;;;show item m listNavettesModes
+      
+;     ;;;;;;;show item m listChemins
+;     ;;;;;;;show item m listNavettesModes
       set tempC item i item m listChemins
+      ;tempC = for mode m, patch on path from k to i
+      
       let c 0 
       while [c < nCsp] [
       
       set temp item i item c item m listNavettesModes
-     
+      ; temp = quantity
      
       let j 0
       while [j < length tempC] [
-        if  item j tempC != nobody [
-        ;;;;;;;;show "ca y'est je suis rentr� dans un chemin"
-          ;;;;;;;;show item j tempC
+         if item j tempC != nobody [
           
-          ;set [utilisation_l] of (item j tempC) ((1 / nIter) * temp) + [utilisation_l] of item j tempC
-          ask (item j tempC) [set utilisation_l ((1 / nIter) * temp) + utilisation_l]
+           ;;;;;;;;show "ca y'est je suis rentr� dans un chemin"
+           ;;;;;;;;show item j tempC
           
-          ;;;;;;;;show [utilisation_l] of item j tempC
+           ;set [utilisation_l] of (item j tempC) ((1 / nIter) * temp) + [utilisation_l] of item j tempC
+           ask (item j tempC) [set utilisation_l ((1 / nIter) * temp) + utilisation_l]
+          
+            ;;;;;;;;show [utilisation_l] of item j tempC
+          ]
+          ;set [utilisation_temp] of item j tempC ((1 / nIter) * temp) + [utilisation_temp] of item j tempC
+          set j j + 1
         ]
-      ;set [utilisation_temp] of item j tempC ((1 / nIter) * temp) + [utilisation_temp] of item j tempC
-      set j j + 1
-      ]
     
         set c c + 1
       ]
@@ -383,6 +414,7 @@ to updateLinksSpeed
 ask links [
   let temp utilisation_l + utilisation_temp
   ifelse  temp > 0 [
+    ; congestion : v=f(phi,c)
   set speed_l speed_empty_l / (1 + 10 * exp(2 * ln(temp / capacity_l)))
   ][
   set speed_l speed_empty_l 

@@ -5,18 +5,36 @@
 ;; Major changes since v2
 ;;   - matrix dynamic shortest path (euclidian and nw) computation
 ;;   - simplified population structure (one csp)
-;;   
+;;   - game-theoretical governance management
+;;
+;; TODO - possible extensions :
+;;    * add different transportation modes ?
+;;    * add csp ? not prioritary.
+;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table]
+extensions[matrix table context nw]
 
 __includes [
   
   ; main
-  "main.nls" 
+  "main.nls"
   
   ; setup
   "setup.nls"
+  
+  ;;;;;;;;;
+  ;; main modules
+  ;;;;;;;;;
+  
+  ;; transportation
+  "transportation.nls"
+  
+  ;; luti
+  "luti.nls"
+  
+  ;; governance
+  "governance.nls"
   
   ;;;;;;;;
   ; agents
@@ -25,12 +43,25 @@ __includes [
   ; mayors
   "mayor.nls"
   
+  ; patches
+  "patches.nls"
+  
+  ;;;;;;;;
+  ; transportation network
+  ;;;;;;;;
+  
+  ; network
+  "network.nls"
+  
   ;;;;;;;;;
   ; functions
   ;;;;;;;;;
   
   ; functions to update distance matrices
   "distances.nls"
+  
+  ; accessibilities
+  "accessibilities.nls"
   
   ;;;;;;;;;;
   ; display
@@ -43,11 +74,27 @@ __includes [
   ;; utils
   ;;;;;;;;;;
   
-  ; temp path
-  "/Users/Juste/Documents/ComplexSystems/Softwares/NetLogo/utils/math/SpatialKernels.nls"
+  ; Q : package utils subpackages or all utils to have a simpler use ?
   
+  "utils/math/SpatialKernels.nls"
   "utils/misc/List.nls"
   "utils/misc/Types.nls"
+  "utils/misc/Matrix.nls"
+  "utils/gui/Display.nls"
+  "utils/agent/Link.nls"
+  "utils/agent/AgentSet.nls"
+  "utils/agent/Agent.nls"
+  "utils/network/Network.nls"
+  "utils/io/Timer.nls"
+  "utils/io/Logger.nls"
+  
+  
+  ;;;;;;;;;;;
+  ;; Tests
+  ;;;;;;;;;;;
+  
+  "test/test-distances.nls"
+  
 ]
 
 
@@ -65,6 +112,43 @@ globals[
   ; spatial distribution params
   ;actives-spatial-dispersion
   ;employments-spatial-distribution
+  
+  ;; global employments and actives list
+  patches-employments
+  patches-actives
+  
+  ;; convergence variables
+  diff-actives
+  diff-employments
+  
+  ; utility : cobb-douglas parameter
+  ;gamma-cobb-douglas
+  
+  ; relocation : discrete choice parameter
+  ;beta-discrete-choices
+  
+  ; governor of the region : particular mayor
+  regional-authority
+  
+  
+  
+  
+  ;;;;;;;;;;;;;
+  ;; Transportation
+  ;;;;;;;;;;;;;
+  
+  ;; transportation flows \phi_ij between patches
+  flow-matrix
+  
+  ;; congestion in patches
+  ; list ordered by patch number
+  patches-congestion
+  
+  ;; maximal pace (inverse of speed) in the transportation network
+  ;network-max-pace
+  
+  
+  
   
   
   ;;;;;;;;;;;;;
@@ -84,11 +168,59 @@ globals[
   ;  - with congestion in network -
   effective-distance-matrix
   
+  nw-access-table
+  
+  ;; cached shortest paths -> updated same time as distance
+  ; stored as table (num_patch_1,num_patch_2) -> [path-as-list]
+  ;
+  ; in network
+  network-shortest-paths
+  
+  ;; list of nw patches
+  nw-patches
+  
+  ;; number of patches
+  #-patches
+  
+  ;; for patches in nw, table caching closest nw inters (i.e. [end1,end2] of my-link )
+  closest-nw-inters
+  
+  ;; network intersections
+  nw-inters
+  
+  ; overall
+  ; stored as table (num_patch_1,num_patch_2) -> [[i,i1],[i1,i2],...,[in,j]] where couples are either (void-nw) or (nw-nw)
+  ; then effective path is [ik->i_k+1] or [ik->_nw i_k+1]
+  effective-shortest-paths
+  
+  ;;
+  ; maximal distance in the world
+  dmax
+  
+  
+  
+  ;;;;;;;;;;;;;
+  ;; Utils
+  ;;;;;;;;;;;;;
+  
+  ; log level : defined in chooser
+  ;log-level
+  
+  
+  ;;;;;;;;;;;;;
+  ;; Tests
+  ;;;;;;;;;;;;;
+  
+  gridor
+  
   
 ]
 
 
 patches-own [
+  
+  ; number of the patch (used as index in distance matrices)
+  number
   
   ; pointer to governing mayor
   governing-mayor
@@ -103,7 +235,29 @@ patches-own [
   
   ; number of jobs on the patch
   employments
+  
+  
+  ;;;;;
+  ;; utilities and accessibilities
+  ;;;;;
+  
+  ; accessibility of jobs to actives
+  a-to-e-accessibility
+  
+  ; accessibility of actives to employments
+  e-to-a-accessibility
    
+  ; utilities
+  ; for actives
+  a-utility
+  ; for employments
+  e-utility
+  
+  ; form factor
+  form-factor
+  
+  
+  
 ]
 
 
@@ -116,16 +270,47 @@ mayors-own[
   ; set of governed patches -> not needed ?
   ;governed-patches
   
+  ; wealth of the area
+  wealth
+  
 ]
+
+
+;;;;;;;;;
+;; Transportation Network
+;;;;;;;;;
+
+;; transportation link
+undirected-link-breed[transportation-links transportation-link]
+
+transportation-links-own [
+  
+  ; capacity of the link ; expressed as max trip per length unit 
+  capacity
+  
+  ; congestion : travels in the link
+  congestion
+  
+  ; speed in the link, deduced from capacity and congestion
+  speed
+  
+]
+
+;; nodes of the transportation network
+breed[transportation-nodes transportation-node]
+
+transportation-nodes-own[
+]
+
 @#$#@#$#@
 GRAPHICS-WINDOW
-358
-15
-797
-475
-16
-16
-13.0
+376
+21
+904
+570
+18
+18
+14.0
 1
 10
 1
@@ -135,10 +320,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--16
-16
--16
-16
+-18
+18
+-18
+18
 0
 0
 1
@@ -161,10 +346,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-20
-341
-86
-374
+26
+498
+92
+531
 setup
 setup
 NIL
@@ -178,14 +363,14 @@ NIL
 1
 
 CHOOSER
-21
-445
-159
-490
+13
+606
+184
+651
 patches-display
 patches-display
-"governance" "actives" "employments"
-2
+"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility"
+3
 
 TEXTBOX
 11
@@ -198,10 +383,10 @@ Setup parameters
 1
 
 TEXTBOX
-15
-188
-165
-206
+9
+161
+159
+179
 Runtime parameters
 11
 0.0
@@ -262,6 +447,394 @@ employments-max
 0
 1000
 500
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+3
+204
+171
+237
+gamma-cobb-douglas
+gamma-cobb-douglas
+0
+1
+0.8
+0.05
+1
+NIL
+HORIZONTAL
+
+BUTTON
+26
+538
+142
+571
+compute utils
+compute-patches-variables\ncolor-patches
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+3
+239
+172
+272
+beta-discrete-choices
+beta-discrete-choices
+0
+2
+1.1
+0.05
+1
+NIL
+HORIZONTAL
+
+BUTTON
+95
+498
+158
+531
+go
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+PLOT
+932
+18
+1092
+138
+convergence
+NIL
+NIL
+0.0
+10.0
+0.0
+100.0
+false
+false
+"" ""
+PENS
+"default" 1.0 0 -5298144 true "" "plot diff-employments"
+"pen-1" 1.0 0 -12087248 true "" "plot diff-actives"
+
+OUTPUT
+940
+283
+1398
+692
+10
+
+TEXTBOX
+9
+187
+159
+205
+LUTI
+11
+0.0
+1
+
+TEXTBOX
+188
+184
+338
+202
+Governance
+11
+0.0
+1
+
+SLIDER
+184
+203
+354
+236
+regional-decision-proba
+regional-decision-proba
+0
+1
+0.5
+0.05
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+174
+202
+189
+233
+|
+25
+0.0
+1
+
+TEXTBOX
+174
+223
+189
+254
+|
+25
+0.0
+1
+
+TEXTBOX
+174
+245
+189
+276
+|
+25
+0.0
+1
+
+SLIDER
+7
+306
+172
+339
+network-min-pace
+network-min-pace
+0
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+3
+256
+206
+283
+_________________
+20
+0.0
+1
+
+TEXTBOX
+7
+285
+157
+303
+Transportation
+11
+0.0
+1
+
+TEXTBOX
+174
+267
+189
+298
+|
+25
+0.0
+1
+
+BUTTON
+1287
+15
+1400
+48
+setup test nw
+setup-test-nw-mat
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1287
+51
+1342
+84
+grid
+test-nw-mat-grid-nw
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1288
+89
+1398
+122
+test shortest
+test-shortest-path
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+MONITOR
+1218
+13
+1282
+58
+th paths
+(length nw-patches) ^ 2
+17
+1
+11
+
+MONITOR
+1223
+61
+1281
+106
+eff paths
+length table:keys network-shortest-paths
+17
+1
+11
+
+MONITOR
+1222
+109
+1279
+154
+inters
+length nw-inters
+17
+1
+11
+
+BUTTON
+1288
+125
+1382
+158
+test inters
+test-closest-inter
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1345
+52
+1408
+85
+rnd
+test-nw-mat-random-nw
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+CHOOSER
+187
+605
+325
+650
+log-level
+log-level
+"DEBUG" "VERBOSE" "DEFAULT"
+1
+
+SLIDER
+7
+342
+171
+375
+euclidian-min-pace
+euclidian-min-pace
+1
+50
+10
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+7
+376
+169
+409
+congestion-price
+congestion-price
+0
+100
+50
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+184
+241
+354
+274
+road-length
+road-length
+0
+20
+10
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+211
+287
+383
+320
+#-explorations
+#-explorations
+0
+20
+10
 1
 1
 NIL
