@@ -517,6 +517,13 @@ to update-nw-patches [new-nw-patches]
   foreach nw-patches [
       matrix:set network-distance-matrix ? ? 0
   ]
+  
+  set nw-access-table table:make let i 0
+     repeat #-patches [table:put nw-access-table i (min-index (matrix-get-sparse-row euclidian-distance-matrix i nw-patches)) set i i + 1]
+   
+  
+  
+  
 end
 
 
