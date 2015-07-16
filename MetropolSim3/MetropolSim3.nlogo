@@ -177,6 +177,10 @@ globals[
   ;  - with congestion in network -
   effective-distance-matrix
   
+  ;;
+  ; Cached access patches to network, i.e. closest patch belonging to nw
+  ;  @type table
+  ;   number -> number of access
   nw-access-table
   
   ;; cached shortest paths -> updated same time as distance
@@ -186,6 +190,8 @@ globals[
   network-shortest-paths
   
   ;; list of nw patches
+  ;  @type list
+  ;  List of network patches number
   nw-patches
   
   ;; number of patches
@@ -195,7 +201,12 @@ globals[
   closest-nw-inters
   
   ;; network intersections
+  ;  @type list
+  ;  List of intersection patches numbers
   nw-inters
+  
+  ;; network clusters
+  network-clusters
   
   ; overall
   ; stored as table (num_patch_1,num_patch_2) -> [[i,i1],[i1,i2],...,[in,j]] where couples are either (void-nw) or (nw-nw)
@@ -385,7 +396,7 @@ CHOOSER
 645
 patches-display
 patches-display
-"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance"
+"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
 9
 
 TEXTBOX
@@ -555,7 +566,7 @@ OUTPUT
 940
 283
 1398
-692
+577
 10
 
 TEXTBOX
@@ -720,12 +731,12 @@ NIL
 1
 
 MONITOR
-1227
+1218
 13
-1282
+1286
 58
-th paths
-(length nw-patches) ^ 2
+nw patches
+length nw-patches
 17
 1
 11
@@ -805,7 +816,7 @@ euclidian-min-pace
 euclidian-min-pace
 1
 50
-10
+7
 1
 1
 NIL
@@ -859,9 +870,9 @@ HORIZONTAL
 BUTTON
 6
 652
-95
+79
 685
-update display
+comp vars
 compute-patches-variables
 NIL
 1
@@ -1003,6 +1014,40 @@ TEXTBOX
 __________________
 20
 0.0
+1
+
+BUTTON
+1240
+166
+1321
+199
+test dist
+setup\ntest-network-effect\ncheck-effective-distance 1180 684
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+82
+653
+174
+686
+update display
+color-patches
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
 1
 
 @#$#@#$#@
