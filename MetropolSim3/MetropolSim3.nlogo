@@ -151,7 +151,7 @@ globals[
   ext-position
   
   ;; path to the setup files
-  positions-file
+  ;positions-file
   ext-file
   
   ;;;;;;;;;;;;;
@@ -382,14 +382,14 @@ ticks
 
 SLIDER
 9
-27
+33
 140
-60
+66
 #-initial-territories
 #-initial-territories
 0
 5
-2
+3
 1
 1
 NIL
@@ -424,9 +424,9 @@ patches-display
 
 TEXTBOX
 11
-7
+15
 161
-25
+33
 Setup parameters
 11
 0.0
@@ -444,26 +444,11 @@ Runtime parameters
 
 SLIDER
 9
-62
+71
 184
-95
+104
 actives-spatial-dispersion
 actives-spatial-dispersion
-0
-100
-4
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-8
-96
-184
-129
-employments-spatial-dispersion
-employments-spatial-dispersion
 0
 100
 2
@@ -473,10 +458,25 @@ NIL
 HORIZONTAL
 
 SLIDER
+8
+105
+184
+138
+employments-spatial-dispersion
+employments-spatial-dispersion
+0
+100
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
 185
-62
+71
 294
-95
+104
 actives-max
 actives-max
 0
@@ -489,9 +489,9 @@ HORIZONTAL
 
 SLIDER
 184
-96
+105
 294
-129
+138
 employments-max
 employments-max
 0
@@ -621,7 +621,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-0
+1
 0.05
 1
 NIL
@@ -869,7 +869,7 @@ road-length
 road-length
 0
 20
-4
+3
 1
 1
 NIL
@@ -884,7 +884,7 @@ SLIDER
 #-explorations
 0
 1000
-68
+200
 1
 1
 NIL
@@ -916,17 +916,17 @@ lambda-accessibility
 lambda-accessibility
 0
 0.1
-0.05
+0.03
 0.001
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1417
-202
-1511
-235
+955
+281
+1049
+314
 indicators
 compute-indicators
 NIL
@@ -1122,13 +1122,13 @@ HORIZONTAL
 
 CHOOSER
 143
-13
-281
-58
+21
+235
+66
 setup-type
 setup-type
 "random" "from-file"
-0
+1
 
 SLIDER
 7
@@ -1172,6 +1172,17 @@ with-externalities?
 1
 1
 -1000
+
+INPUTBOX
+237
+10
+315
+70
+positions-file
+setup/triangle.csv
+1
+0
+String
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1243,6 +1254,38 @@ Circle -7500403 true true 110 127 80
 Circle -7500403 true true 110 75 80
 Line -7500403 true 150 100 80 30
 Line -7500403 true 150 100 220 30
+
+building institution
+false
+0
+Rectangle -7500403 true true 0 60 300 270
+Rectangle -16777216 true false 130 196 168 256
+Rectangle -16777216 false false 0 255 300 270
+Polygon -7500403 true true 0 60 150 15 300 60
+Polygon -16777216 false false 0 60 150 15 300 60
+Circle -1 true false 135 26 30
+Circle -16777216 false false 135 25 30
+Rectangle -16777216 false false 0 60 300 75
+Rectangle -16777216 false false 218 75 255 90
+Rectangle -16777216 false false 218 240 255 255
+Rectangle -16777216 false false 224 90 249 240
+Rectangle -16777216 false false 45 75 82 90
+Rectangle -16777216 false false 45 240 82 255
+Rectangle -16777216 false false 51 90 76 240
+Rectangle -16777216 false false 90 240 127 255
+Rectangle -16777216 false false 90 75 127 90
+Rectangle -16777216 false false 96 90 121 240
+Rectangle -16777216 false false 179 90 204 240
+Rectangle -16777216 false false 173 75 210 90
+Rectangle -16777216 false false 173 240 210 255
+Rectangle -16777216 false false 269 90 294 240
+Rectangle -16777216 false false 263 75 300 90
+Rectangle -16777216 false false 263 240 300 255
+Rectangle -16777216 false false 0 240 37 255
+Rectangle -16777216 false false 6 90 31 240
+Rectangle -16777216 false false 0 75 37 90
+Line -16777216 false 112 260 184 260
+Line -16777216 false 105 265 196 265
 
 butterfly
 true

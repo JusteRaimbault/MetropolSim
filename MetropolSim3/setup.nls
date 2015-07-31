@@ -50,7 +50,6 @@ to setup-territories
   output-print "... Territories"
   
   ; for now hardcoded path to setup file (unload gui)
-  set positions-file "setup/positions.csv"
   set ext-file "setup/ext.csv"
   
   read-position-files
@@ -227,8 +226,6 @@ end
 
 ;;
 ; default values ; for headless run
-;  -- comment line if parameter included in exploration --
-;  -- check calibrated values --
 to setup-headless-vars
   
   ; initial distributions
@@ -256,17 +253,6 @@ to setup-headless-vars
   
   set total-time-steps 4
   
-  set setup-type "random"
-  
-  set lambda-flows 0.1
-  
-  set with-externalities? false
-  
-  set ext-growth-factor 1
-  
-  set game-type "random"
-  
-  set collaboration-cost 0.001
   
 end
 
