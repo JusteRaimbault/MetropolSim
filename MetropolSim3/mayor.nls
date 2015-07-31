@@ -9,7 +9,15 @@
 ; initial position in space
 ;  (different implementation possible)
 to initial-position-mayor
-  setxy random-xcor random-ycor
+  if setup-type = "random" [
+    setxy random-xcor random-ycor
+  ]
+  if setup-type = "from-file" [
+    ; index given by already existing number of mayors, different from the regional authority
+    let i count mayors with [self != regional-authority]
+    let pos item i mayors-coordinates
+    setxy first pos last pos
+  ]
 end
 
 ;;

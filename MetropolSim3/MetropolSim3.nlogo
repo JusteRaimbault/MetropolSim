@@ -95,7 +95,8 @@ __includes [
   "utils/network/Network.nls"
   "utils/io/Timer.nls"
   "utils/io/Logger.nls"
-  
+  "utils/io/FileUtilities.nls"
+  "utils/misc/String.nls"
   
   ;;;;;;;;;;;
   ;; Tests
@@ -140,7 +141,18 @@ globals[
   regional-authority
   
   
+  ;; list of patches for the external facility
+  external-facility
   
+  ;; coordinates of mayors, taken from setup file
+  mayors-coordinates
+  
+  ;; position of ext patch
+  ext-position
+  
+  ;; path to the setup files
+  positions-file
+  ext-file
   
   ;;;;;;;;;;;;;
   ;; Transportation
@@ -208,6 +220,9 @@ globals[
   ;; network clusters
   network-clusters
   
+  ;; connexion between clusters
+  network-clusters-connectors
+  
   ; overall
   ; stored as table (num_patch_1,num_patch_2) -> [[i,i1],[i1,i2],...,[in,j]] where couples are either (void-nw) or (nw-nw)
   ; then effective path is [ik->i_k+1] or [ik->_nw i_k+1]
@@ -261,6 +276,10 @@ patches-own [
   employments
   
   
+  
+  
+  
+  
   ;;;;;
   ;; utilities and accessibilities
   ;;;;;
@@ -270,6 +289,10 @@ patches-own [
   
   ; accessibility of actives to employments
   e-to-a-accessibility
+   
+  ; previous and current cumulated accessibilities
+  prev-accessibility
+  current-accessibility
    
   ; travel distances
   a-to-e-distance
@@ -331,13 +354,13 @@ transportation-nodes-own[
 ]
 @#$#@#$#@
 GRAPHICS-WINDOW
-376
-21
-904
-570
-18
-18
-14.0
+368
+10
+919
+582
+10
+10
+25.8
 1
 10
 1
@@ -347,10 +370,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--18
-18
--18
-18
+-10
+10
+-10
+10
 0
 0
 1
@@ -373,10 +396,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-26
-498
-92
-531
+9
+611
+75
+644
 setup
 setup
 NIL
@@ -390,14 +413,14 @@ NIL
 1
 
 CHOOSER
-5
-600
-124
-645
+362
+611
+481
+656
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-9
+5
 
 TEXTBOX
 11
@@ -428,7 +451,7 @@ actives-spatial-dispersion
 actives-spatial-dispersion
 0
 100
-5
+4
 1
 1
 NIL
@@ -443,7 +466,7 @@ employments-spatial-dispersion
 employments-spatial-dispersion
 0
 100
-5
+2
 1
 1
 NIL
@@ -488,17 +511,17 @@ gamma-cobb-douglas
 gamma-cobb-douglas
 0
 1
-0.6
-0.05
+0.85
+0.01
 1
 NIL
 HORIZONTAL
 
 BUTTON
-26
-538
-142
-571
+32
+649
+148
+682
 compute utils
 compute-patches-variables\ncolor-patches
 NIL
@@ -520,17 +543,17 @@ beta-discrete-choices
 beta-discrete-choices
 0
 2
-1.1
+2
 0.05
 1
 NIL
 HORIZONTAL
 
 BUTTON
-95
-498
-158
-531
+136
+611
+191
+644
 go
 go
 T
@@ -544,10 +567,10 @@ NIL
 1
 
 PLOT
-913
-13
-1073
-133
+1149
+10
+1309
+130
 convergence
 NIL
 NIL
@@ -563,10 +586,10 @@ PENS
 "pen-1" 1.0 0 -12087248 true "" "plot diff-actives"
 
 OUTPUT
-940
-283
-1398
-577
+957
+319
+1415
+675
 10
 
 TEXTBOX
@@ -598,7 +621,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-0.5
+0
 0.05
 1
 NIL
@@ -680,10 +703,10 @@ TEXTBOX
 1
 
 BUTTON
-1287
-15
-1400
-48
+1398
+19
+1511
+52
 setup test nw
 setup-test-nw-mat
 NIL
@@ -697,10 +720,10 @@ NIL
 1
 
 BUTTON
-1287
-51
-1342
-84
+1398
+55
+1453
+88
 grid
 test-nw-mat-grid-nw
 NIL
@@ -714,10 +737,10 @@ NIL
 1
 
 BUTTON
-1288
-89
-1398
-122
+1399
+93
+1509
+126
 test shortest
 test-shortest-path
 NIL
@@ -731,10 +754,10 @@ NIL
 1
 
 MONITOR
-1218
-13
-1286
-58
+1329
+17
+1397
+62
 nw patches
 length nw-patches
 17
@@ -742,10 +765,10 @@ length nw-patches
 11
 
 MONITOR
-1227
-61
-1281
-106
+1338
+65
+1392
+110
 eff paths
 length table:keys network-shortest-paths
 17
@@ -753,10 +776,10 @@ length table:keys network-shortest-paths
 11
 
 MONITOR
-1228
-109
-1279
-154
+1339
+113
+1390
+158
 inters
 length nw-inters
 17
@@ -764,10 +787,10 @@ length nw-inters
 11
 
 BUTTON
-1288
-125
-1382
-158
+1399
+129
+1493
+162
 test inters
 test-closest-inter
 NIL
@@ -781,10 +804,10 @@ NIL
 1
 
 BUTTON
-1345
-52
-1408
-85
+1454
+55
+1517
+88
 rnd
 test-nw-mat-random-nw
 NIL
@@ -798,10 +821,10 @@ NIL
 1
 
 CHOOSER
-126
-600
-264
-645
+483
+611
+621
+656
 log-level
 log-level
 "DEBUG" "VERBOSE" "DEFAULT"
@@ -816,7 +839,7 @@ euclidian-min-pace
 euclidian-min-pace
 1
 50
-7
+5
 1
 1
 NIL
@@ -830,9 +853,9 @@ SLIDER
 congestion-price
 congestion-price
 0
-100
-2
-1
+10
+0
+0.1
 1
 NIL
 HORIZONTAL
@@ -846,7 +869,7 @@ road-length
 road-length
 0
 20
-7
+4
 1
 1
 NIL
@@ -860,18 +883,18 @@ SLIDER
 #-explorations
 #-explorations
 0
-20
-4
+1000
+68
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-6
-652
-79
-685
+363
+663
+436
+696
 comp vars
 compute-patches-variables
 NIL
@@ -892,18 +915,18 @@ SLIDER
 lambda-accessibility
 lambda-accessibility
 0
-1
-0.085
-0.005
+0.1
+0.05
+0.001
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1303
-245
-1397
-278
+1417
+202
+1511
+235
 indicators
 compute-indicators
 NIL
@@ -917,10 +940,10 @@ NIL
 1
 
 SLIDER
-186
-375
-348
-408
+154
+649
+289
+682
 total-time-steps
 total-time-steps
 0
@@ -933,9 +956,9 @@ HORIZONTAL
 
 TEXTBOX
 182
-346
-418
-381
+411
+334
+446
 __________________
 20
 0.0
@@ -948,8 +971,8 @@ CHOOSER
 357
 game-type
 game-type
-"random"
-0
+"random" "simple-nash"
+1
 
 TEXTBOX
 174
@@ -972,10 +995,10 @@ TEXTBOX
 1
 
 PLOT
-914
-134
-1074
-254
+1150
+131
+1310
+251
 accessibility
 NIL
 NIL
@@ -987,9 +1010,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean-accessibility"
-"pen-1" 1.0 0 -7858858 true "" "plot max-accessibility"
-"pen-2" 1.0 0 -4757638 true "" "plot min-accessibility"
+"default" 1.0 0 -12186836 true "" "plot mean-accessibility patches"
 
 SLIDER
 6
@@ -1007,22 +1028,22 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-7
-467
-194
-511
+13
+578
+200
+622
 __________________
 20
 0.0
 1
 
 BUTTON
-1240
+1336
 166
-1321
+1417
 199
 test dist
-setup\ntest-network-effect\ncheck-effective-distance 1180 684
+setup\ntest-network-effect (patches with [pxcor = 0])\n;check-effective-distance 1180 684
 NIL
 1
 T
@@ -1034,10 +1055,10 @@ NIL
 1
 
 BUTTON
-82
-653
-174
-686
+439
+664
+531
+697
 update display
 color-patches
 NIL
@@ -1049,6 +1070,108 @@ NIL
 NIL
 NIL
 1
+
+BUTTON
+1420
+165
+1502
+198
+test connex
+test-connex-components
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+1336
+201
+1409
+234
+nw effect
+test-network-effect patches
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+184
+359
+332
+392
+collaboration-cost
+collaboration-cost
+0
+0.01
+0.007519
+1e-6
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+143
+13
+281
+58
+setup-type
+setup-type
+"random" "from-file"
+0
+
+SLIDER
+7
+550
+152
+583
+ext-growth-factor
+ext-growth-factor
+0
+1
+0.5
+0.1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+78
+611
+133
+644
+go
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SWITCH
+5
+514
+151
+547
+with-externalities?
+with-externalities?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
