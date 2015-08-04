@@ -419,8 +419,8 @@ CHOOSER
 656
 patches-display
 patches-display
-"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-5
+"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
+7
 
 TEXTBOX
 11
