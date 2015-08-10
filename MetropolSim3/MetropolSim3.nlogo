@@ -248,6 +248,8 @@ globals[
   
   gridor
   
+  ;; infra constructed by hand
+  to-construct
   
   ;; HEADLESS
   headless?
@@ -356,11 +358,11 @@ transportation-nodes-own[
 GRAPHICS-WINDOW
 368
 10
-919
-582
+903
+566
 10
 10
-25.8
+25.0
 1
 10
 1
@@ -389,7 +391,7 @@ SLIDER
 #-initial-territories
 0
 5
-3
+2
 1
 1
 NIL
@@ -413,14 +415,14 @@ NIL
 1
 
 CHOOSER
-362
+380
 611
-481
+499
 656
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-7
+2
 
 TEXTBOX
 11
@@ -451,7 +453,7 @@ actives-spatial-dispersion
 actives-spatial-dispersion
 0
 100
-2
+1
 1
 1
 NIL
@@ -465,9 +467,9 @@ SLIDER
 employments-spatial-dispersion
 employments-spatial-dispersion
 0
-100
-1
-1
+10
+0.8
+0.1
 1
 NIL
 HORIZONTAL
@@ -503,12 +505,12 @@ NIL
 HORIZONTAL
 
 SLIDER
-3
-204
-171
-237
-gamma-cobb-douglas
-gamma-cobb-douglas
+0
+203
+178
+236
+gamma-cobb-douglas-a
+gamma-cobb-douglas-a
 0
 1
 0.85
@@ -517,28 +519,11 @@ gamma-cobb-douglas
 NIL
 HORIZONTAL
 
-BUTTON
-32
-649
-148
-682
-compute utils
-compute-patches-variables\ncolor-patches
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
 3
-239
+273
 172
-272
+306
 beta-discrete-choices
 beta-discrete-choices
 0
@@ -593,10 +578,10 @@ OUTPUT
 10
 
 TEXTBOX
-9
-187
-159
-205
+6
+186
+156
+204
 LUTI
 11
 0.0
@@ -658,10 +643,10 @@ TEXTBOX
 1
 
 SLIDER
-6
-342
-171
-375
+5
+372
+170
+405
 network-min-pace
 network-min-pace
 0
@@ -674,19 +659,19 @@ HORIZONTAL
 
 TEXTBOX
 4
-298
+331
 207
-325
+358
 _________________
 20
 0.0
 1
 
 TEXTBOX
-6
-327
-156
-345
+5
+357
+155
+375
 Transportation
 11
 0.0
@@ -821,9 +806,9 @@ NIL
 1
 
 CHOOSER
-483
+501
 611
-621
+639
 656
 log-level
 log-level
@@ -831,10 +816,10 @@ log-level
 1
 
 SLIDER
-6
-378
-170
-411
+5
+408
+169
+441
 euclidian-min-pace
 euclidian-min-pace
 1
@@ -846,15 +831,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-412
-170
-445
+5
+442
+169
+475
 congestion-price
 congestion-price
 0
 10
-0
+1
 0.1
 1
 NIL
@@ -869,7 +854,7 @@ road-length
 road-length
 0
 20
-3
+2
 1
 1
 NIL
@@ -884,34 +869,17 @@ SLIDER
 #-explorations
 0
 1000
-200
+15
 1
 1
 NIL
 HORIZONTAL
 
-BUTTON
-363
-663
-436
-696
-comp vars
-compute-patches-variables
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
 SLIDER
 4
-273
+307
 171
-306
+340
 lambda-accessibility
 lambda-accessibility
 0
@@ -940,15 +908,15 @@ NIL
 1
 
 SLIDER
-154
-649
-289
-682
+197
+611
+321
+644
 total-time-steps
 total-time-steps
 0
 20
-5
+6
 1
 1
 NIL
@@ -1013,15 +981,15 @@ PENS
 "default" 1.0 0 -12186836 true "" "plot mean-accessibility patches"
 
 SLIDER
-6
-447
-169
-480
+5
+477
+168
+510
 lambda-flows
 lambda-flows
 0
 1
-0.5
+1
 0.005
 1
 NIL
@@ -1055,12 +1023,12 @@ NIL
 1
 
 BUTTON
-439
-664
-531
-697
-update display
-color-patches
+382
+660
+457
+693
+update
+compute-patches-variables\ncolor-patches
 NIL
 1
 T
@@ -1072,10 +1040,10 @@ NIL
 1
 
 BUTTON
-1420
-165
-1502
-198
+1164
+283
+1246
+316
 test connex
 test-connex-components
 NIL
@@ -1139,7 +1107,7 @@ ext-growth-factor
 ext-growth-factor
 0
 1
-0.5
+1
 0.1
 1
 NIL
@@ -1169,7 +1137,7 @@ SWITCH
 547
 with-externalities?
 with-externalities?
-1
+0
 1
 -1000
 
@@ -1179,10 +1147,102 @@ INPUTBOX
 315
 70
 positions-file
-setup/triangle.csv
+setup/positions.csv
 1
 0
 String
+
+BUTTON
+1053
+280
+1145
+313
+construct
+if mouse-down? [\n  if length to-construct < 2[\n    set to-construct lput (list mouse-xcor mouse-ycor) to-construct\n  ]\n  if length to-construct = 2[\n    construct-infrastructure (list to-construct) save-nw-config\n    compute-patches-variables\n    update-display\n    set to-construct []\n    verbose (word \"mean-travel-distance : \" mean-travel-distance)\n    stop\n  ]\n  wait 0.2\n  \n]
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+153
+513
+266
+546
+ext-employments-proportion-of-max
+ext-employments-proportion-of-max
+0
+5
+3
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+0
+238
+177
+271
+gamma-cobb-douglas-e
+gamma-cobb-douglas-e
+0
+1
+0.65
+0.05
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+382
+591
+532
+609
+Display
+11
+0.0
+1
+
+BUTTON
+9
+647
+72
+680
+NIL
+luti
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+PLOT
+983
+10
+1143
+130
+externalities
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot externality-employments"
 
 @#$#@#$#@
 ## WHAT IS IT?

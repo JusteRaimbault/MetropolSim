@@ -43,6 +43,11 @@ to-report mean-travel-distance
   report sum [a-to-e-distance] of patches / ((sum [actives] of patches) * (sum [employments] of patches))
 end
 
+; mean nw distance between nw patches
+to-report mean-network-distance
+  
+end
+
 
 ; mean congestion in network
 to-report mean-congestion
@@ -68,6 +73,17 @@ to-report employments-entropy
   report (- 1 / (ln count patches) * sum [employments / etot * ln (employments / etot)] of patches)
 end
 
+
+
+;;
+; Sum of employments in the external facility
+to-report externality-employments
+  ifelse external-facility = 0 or length external-facility = 0 [
+    report 0 
+  ][
+    report sum [employments] of patches with [member? number external-facility]
+  ]
+end
 
 
 
