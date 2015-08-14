@@ -12,6 +12,8 @@ to setup
   if headless? = 0 [
     clear-all
   ]
+  
+  set setup-type "random"
    
   reset-ticks
   
@@ -255,44 +257,11 @@ to setup-patch-variables
 end
 
 
-;;
-; default values ; for headless run
-to setup-headless-vars
-  
-  ; initial distributions
-  set actives-max 500 set employments-max 500
-  set actives-spatial-dispersion 5
-  set employments-spatial-dispersion 5
-  
-  set #-initial-territories 2
-  
-  ; luti params
-  set gamma-cobb-douglas-e 0.75
-  set gamma-cobb-douglas-a 0.25
-  set beta-discrete-choices 1.1
-  set lambda-accessibility 0.05
-  
-  ; governance params
-  set regional-decision-proba 0.5
-  set road-length 5
-  set #-explorations 5
-  set log-level "DEFAULT"
-  
-  ; transportation params
-  set network-min-pace 1
-  set euclidian-min-pace 2
-  set congestion-price 50
-  
-  set total-time-steps 4
-  
-  
-end
-
-
 
 ;;
 ; Get number of mayors and position from csv file
 to read-position-files
+  if setup-type = "from-file"[
   let lines read-file positions-file
   set mayors-coordinates []
   foreach but-first but-first lines [
@@ -309,6 +278,59 @@ to read-position-files
   foreach explode ";" first but-first but-first read-file ext-file [
      set ext-position lput read-from-string ? ext-position
   ]
+  
+  ]
+end
+
+
+
+
+
+
+;;
+; default values ; for headless run
+to setup-headless-vars
+  
+  ; general 
+  set #-initial-territories 2
+  set log-level "DEFAULT"
+  set total-time-steps 4
+  
+  
+  ; initial distributions
+  set actives-max 500 set employments-max 500
+  set actives-spatial-dispersion 5
+  set employments-spatial-dispersion 5
+  
+  
+  
+  ; luti params
+  set gamma-cobb-douglas-e 0.75
+  set gamma-cobb-douglas-a 0.25
+  set beta-discrete-choices 1.1
+  set lambda-accessibility 0.05
+  
+  ; governance params
+  set regional-decision-proba 0.5
+  set road-length 5
+  set #-explorations 10
+  set game-type "random"
+  set infra-snapping-tolerance 2
+
+  ; transportation params
+  set network-min-pace 1
+  set euclidian-min-pace 2
+  set congestion-price 50
+  
+ 
+  ; externalities
+  set with-externalities? false
+  set ext-employments-proportion-of-max 1
+  
+  
+  
+  
+  
   
   
 end

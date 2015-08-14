@@ -13,7 +13,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw]
+extensions[matrix table context nw shell gradient]
 
 __includes [
   
@@ -76,6 +76,12 @@ __includes [
   
   "indicators.nls"
   
+  ;;;;;;;;;;
+  ;; visual exploration
+  ;;;;;;;;;;
+  
+  "exploration.nls"
+  
   
   ;;;;;;;;;;
   ;; utils
@@ -85,6 +91,7 @@ __includes [
   
   "utils/math/SpatialKernels.nls"
   "utils/math/Statistics.nls"
+  "utils/math/EuclidianDistanceUtilities.nls"
   "utils/misc/List.nls"
   "utils/misc/Types.nls"
   "utils/misc/Matrix.nls"
@@ -347,6 +354,9 @@ transportation-links-own [
   ; speed in the link, deduced from capacity and congestion
   speed
   
+  ; tick on which the infra has been constructed
+  age
+  
 ]
 
 ;; nodes of the transportation network
@@ -356,9 +366,9 @@ transportation-nodes-own[
 ]
 @#$#@#$#@
 GRAPHICS-WINDOW
-368
+346
 10
-903
+881
 566
 10
 10
@@ -422,7 +432,7 @@ CHOOSER
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-2
+11
 
 TEXTBOX
 11
@@ -513,7 +523,7 @@ gamma-cobb-douglas-a
 gamma-cobb-douglas-a
 0
 1
-0.85
+0.9
 0.01
 1
 NIL
@@ -528,7 +538,7 @@ beta-discrete-choices
 beta-discrete-choices
 0
 2
-2
+1.8
 0.05
 1
 NIL
@@ -540,7 +550,7 @@ BUTTON
 191
 644
 go
-go
+ifelse ticks < total-time-steps [\n  go\n][stop]
 T
 1
 T
@@ -549,7 +559,7 @@ NIL
 NIL
 NIL
 NIL
-1
+0
 
 PLOT
 1149
@@ -571,9 +581,9 @@ PENS
 "pen-1" 1.0 0 -12087248 true "" "plot diff-actives"
 
 OUTPUT
-957
+935
 319
-1415
+1393
 675
 10
 
@@ -606,7 +616,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-1
+0.3
 0.05
 1
 NIL
@@ -813,7 +823,7 @@ CHOOSER
 log-level
 log-level
 "DEBUG" "VERBOSE" "DEFAULT"
-1
+2
 
 SLIDER
 5
@@ -861,10 +871,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-185
-277
-333
-310
+186
+313
+334
+346
 #-explorations
 #-explorations
 0
@@ -884,16 +894,16 @@ lambda-accessibility
 lambda-accessibility
 0
 0.1
-0.03
+0.0020
 0.001
 1
 NIL
 HORIZONTAL
 
 BUTTON
-955
+933
 281
-1049
+1027
 314
 indicators
 compute-indicators
@@ -916,7 +926,7 @@ total-time-steps
 total-time-steps
 0
 20
-6
+4
 1
 1
 NIL
@@ -933,14 +943,14 @@ __________________
 1
 
 CHOOSER
-185
-312
-332
-357
+186
+348
+333
+393
 game-type
 game-type
 "random" "simple-nash"
-1
+0
 
 TEXTBOX
 174
@@ -1074,10 +1084,10 @@ NIL
 1
 
 SLIDER
-184
-359
-332
-392
+185
+395
+333
+428
 collaboration-cost
 collaboration-cost
 0
@@ -1096,7 +1106,7 @@ CHOOSER
 setup-type
 setup-type
 "random" "from-file"
-1
+0
 
 SLIDER
 7
@@ -1147,15 +1157,15 @@ INPUTBOX
 315
 70
 positions-file
-setup/positions.csv
+setup/triangle.csv
 1
 0
 String
 
 BUTTON
-1053
+1031
 280
-1145
+1123
 313
 construct
 if mouse-down? [\n  if length to-construct < 2[\n    set to-construct lput (list mouse-xcor mouse-ycor) to-construct\n  ]\n  if length to-construct = 2[\n    construct-infrastructure (list to-construct) save-nw-config\n    compute-patches-variables\n    update-display\n    set to-construct []\n    verbose (word \"mean-travel-distance : \" mean-travel-distance)\n    stop\n  ]\n  wait 0.2\n  \n]
@@ -1243,6 +1253,21 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot externality-employments"
+
+SLIDER
+185
+277
+335
+310
+infra-snapping-tolerance
+infra-snapping-tolerance
+0
+10
+2
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
