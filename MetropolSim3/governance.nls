@@ -109,6 +109,7 @@ to-report compare-infrastructures [old-nw-config choices decidor patchset]
   verbose (word "comparing " length choices " infras")
   
   recall-nw-config old-nw-config
+  update-effective-matrices
   
   ; old mean accessibility
   compute-patches-accessibilities
@@ -118,7 +119,7 @@ to-report compare-infrastructures [old-nw-config choices decidor patchset]
   
   verbose (word "Mean-travel-distance : " mean-travel-distance)
   
-  let best-choice [] let delta-acc 0 let deltas []
+  let best-choice [] let delta-acc 0 let deltas rep 0 length olds
   foreach choices [
     recall-nw-config old-nw-config
     verbose (word "Infra : " ? )
@@ -187,9 +188,9 @@ to-report game-result [decidors old-config]
    
    
    ;; Mixed strategy nash eq (2 players)
-   if game-type = "simple-nash" and length decidors = 2 [
+   if (game-type = "simple-nash" or game-type = "discrete-choices") and length decidors = 2 [
      
-      verbose "Nash game..."
+      output-print game-type
      
       let dec1 first decidors let dec2 last decidors
      
@@ -206,21 +207,42 @@ to-report game-result [decidors old-config]
       
       verbose (word "D11 = " D11 " ; D22 = " D22 " ; Dc1 = " Dc1 " ; Dc2 = " Dc2)
       
-      let construction-cost 1
+      ; no influence on nash result !
+      ;let construction-cost 1e-3
       
-      let m1 (list (list (Dc1 - construction-cost - collaboration-cost) (D11 - construction-cost - collaboration-cost)) (list (D11 - construction-cost) (D11 - construction-cost)))
-      let m2 (list (list (Dc2 - construction-cost - collaboration-cost) (D22 - construction-cost - collaboration-cost)) (list (D22 - construction-cost) (D22 - construction-cost)))
+      ;let m1 (list (list (Dc1 - construction-cost - collaboration-cost) (D11 - construction-cost - collaboration-cost)) (list (D11 - construction-cost) (D11 - construction-cost)))
+      ;let m2 (list (list (Dc2 - construction-cost - collaboration-cost) (D22 - construction-cost - collaboration-cost)) (list (D22 - construction-cost) (D22 - construction-cost)))
       
-      let eq generic-mixed-strategy-nash m1 m2
-      let p1 first eq let p2 last eq
+      ;let eq generic-mixed-strategy-nash m1 m2
+      ;let p1 first eq let p2 last eq
       
+      let p1 1 
+      let p2 1
+      
+      ifelse game-type = "simple-nash"[
+        if (Dc2 - D22) != 0 [set p1 collaboration-cost / (Dc2 - D22)]
+        if (Dc1 - D11) != 0 [set p2 collaboration-cost / (Dc1 - D11)]
+        set p1 min (list max (list p1 0) 1) ; impose proba
+        set p2 min (list max (list p2 0) 1)
+      ][
+        ; discrete-choices
+        set p1 (numanal:brent-root (task [to-rootize-dc-game ? collaboration-cost (D11 - construction-cost) (Dc1 - D11) (D22 - construction-cost) (Dc2 - D22) beta-dc-game]) 0 1 0.01)
+        set p2 (numanal:brent-root (task [to-rootize-dc-game ? collaboration-cost (D22 - construction-cost) (Dc2 - D22) (D11 - construction-cost) (Dc1 - D11) beta-dc-game]) 0 1 0.01)
+      ]
+      
+      
+      
+      verbose (word "denom : 1 : " (Dc2 - D22) " ; 2 : " (Dc1 - D11))
       verbose (word "probas : p1 = " p1 " ; p2 = " p2)
+      ;verbose (word " dc game : p1 = " (numanal:brent-root (task [to-rootize-dc-game ? collaboration-cost (D11 - construction-cost) (Dc1 - D11) (D22 - construction-cost) (Dc2 - D22)  beta-dc-game]) 0 1 0.01) " ; p2 = " (numanal:brent-root (task [to-rootize-dc-game ? collaboration-cost (D22 - construction-cost) (Dc2 - D22)  (D11 - construction-cost) (Dc1 - D11) beta-dc-game]) 0 1 0.01))
+      
+      set collaborations-expected lput p1 lput p2 collaborations-expected
       
       let r1 random-float 1 let r2 random-float 1
-      if r1 < p1 and r2 < p2 [verbose (word "Game : C - C") report (list first best12)]
-      if r1 < p1 and r2 > p2 [verbose (word "Game : C - NC") report (list first best1 first best2)]
-      if r1 > p1 and r2 < p2 [verbose (word "Game : NC - C") report (list first best1 first best2)]
-      if r1 > p1 and r2 > p2 [verbose (word "Game : NC - NC") report (list first best1 first best2)]
+      if r1 < p1 and r2 < p2 [output-print (word "Game : C - C") set collaborations-wanted lput 1 lput 1 collaborations-wanted set collaborations-realized lput 1 collaborations-realized report (list first best12)]
+      if r1 < p1 and r2 > p2 [output-print (word "Game : C - NC") set collaborations-wanted lput 1 lput 0 collaborations-wanted set collaborations-realized lput 0 collaborations-realized report (list first best1 first best2)]
+      if r1 > p1 and r2 < p2 [output-print (word "Game : NC - C") set collaborations-wanted lput 0 lput 1 collaborations-wanted set collaborations-realized lput 0 collaborations-realized report (list first best1 first best2)]
+      if r1 > p1 and r2 > p2 [output-print (word "Game : NC - NC") set collaborations-wanted lput 0 lput 0 collaborations-wanted set collaborations-realized lput 0 collaborations-realized report (list first best1 first best2)]
       report (list first best12)
    ]  
   
@@ -245,6 +267,15 @@ end
 
 
 
+to-report to-rootize-dc-game [p1 J deltaI1 deltaC1 deltaI2 deltaC2 beta]
+  ;let num exp (beta * ((exp (beta * (p1 * deltaC2 - J)) / (exp(beta * (p1 * deltaC2 - J)) + exp (beta * deltaI2))) * deltaC1 - J))
+  ;report ((num / (num + exp (beta * deltaI1) )) - p1 )
+  report (1 / (1 + exp (- beta * (((deltaC1 - deltaI1)/(1 + exp (- beta * ((p1 * (deltaC2 - deltaI2)) - J)))) - J)))) - p1
+end
+
+
+
+
 ;;
 ; Construct the given infrastructures (list of infras)
 ;
@@ -252,6 +283,7 @@ end
 to construct-infrastructure [infras old-config]
   
   recall-nw-config old-config
+  update-effective-matrices
   
   foreach infras [
     
@@ -270,12 +302,14 @@ to construct-infrastructure [infras old-config]
     
       update-effective-matrices
     
-      ; then correct the network by planarization if intersecting links.
-      ; Beware, has to be done AFTER updating matrices, as nw updating needs footprint of the link (fastest way to get patches newly connected to the network
-      ;  but planarizing before would kill the entire links, cutting it into smaller
-      planarize-network transportation-nodes transportation-links
     ]
   ]
+  
+  
+  ; then correct the network by planarization if intersecting links.
+  ; Beware, has to be done AFTER updating matrices, as nw updating needs footprint of the link (fastest way to get patches newly connected to the network
+  ;  but planarizing before would kill the entire links, cutting it into smaller
+  planarize-network transportation-nodes transportation-links
   
   update-network-age (last old-config)
   
@@ -318,11 +352,14 @@ to-report random-infra [patchset infra-length]
   let p2 nobody if p1 != nobody [ask p1 [set p2 one-of patchset with [abs(distance myself - infra-length) < 1.5]]]
   if p2 = nobody [ if p1 != nobody [ask p1 [set p2 one-of patchset with [distance myself < infra-length]]]]
   if p2 = nobody [ if p1 != nobody [ask p1 [set p2 one-of patches with [abs(distance myself - infra-length) < 1.5]]]] ; if patchset too small, test other end on all patches
+  
+  let c1 [] let c2 []
+  
   ifelse p2 = nobody or p1 = nobody [
-    report (list (list random-pxcor random-pycor) (list random-pxcor random-pycor))
+    set c1 (list random-pxcor random-pycor) set c2 (list random-pxcor random-pycor)
   ][
     ; for each existing infrastructure, check if closer than snapping threshold, report projection if needed
-    let c1 (list [pxcor] of p1 [pycor] of p1) let c2 (list [pxcor] of p2 [pycor] of p2)
+    set c1 (list [pxcor] of p1 [pycor] of p1) set c2 (list [pxcor] of p2 [pycor] of p2)
     ask transportation-links [
        ask p1 [
          if distance-to-link myself < infra-snapping-tolerance [
@@ -336,13 +373,15 @@ to-report random-infra [patchset infra-length]
        ]
     ]
     
-    ifelse c1 = c2 [
+    
+  ]
+  
+  ifelse (first c1 = first c2 and last c1 = last c2) or (first c1 = last c2 and last c1 = first c2)[
       report (list [] []) 
     ]
     [
       report (list c1 c2) 
     ] 
-  ]
 end
 
 

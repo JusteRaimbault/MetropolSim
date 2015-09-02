@@ -54,6 +54,7 @@ end
 
 to setup-vars
   set to-construct []
+  set collaborations-wanted [] set collaborations-realized [] set collaborations-expected []
 end
 
 ;;
@@ -132,7 +133,11 @@ end
 to setup-externalities
   let ext-patch nobody
   if setup-type = "random" [
-    set ext-patch one-of patches
+    ; with 2 mayors : equidistance
+    let m to-list (mayors with [self != regional-authority])
+    ifelse length m = 2 [
+      set ext-patch one-of patches with [abs (distance item 0 m - distance item 1 m) < sqrt 2 and pxcor < max-pxcor and pxcor > min-pxcor and pycor < max-pycor and pycor > min-pycor ]
+    ][ set ext-patch one-of patches]
   ] 
   if setup-type = "from-file" [
     set ext-patch patch first ext-position last ext-position
@@ -254,6 +259,7 @@ end
 ;; initial utilities and accessibilities
 to setup-patch-variables
   compute-patches-variables
+  set initial-max-acc max [current-accessibility] of patches
 end
 
 
@@ -294,38 +300,44 @@ to setup-headless-vars
   ; general 
   set #-initial-territories 2
   set log-level "DEFAULT"
+  ;set log-level "VERBOSE"
   set total-time-steps 4
   
   
   ; initial distributions
   set actives-max 500 set employments-max 500
-  set actives-spatial-dispersion 5
-  set employments-spatial-dispersion 5
+  set actives-spatial-dispersion 1
+  set employments-spatial-dispersion 0.8
   
   
   
   ; luti params
-  set gamma-cobb-douglas-e 0.75
-  set gamma-cobb-douglas-a 0.25
-  set beta-discrete-choices 1.1
-  set lambda-accessibility 0.05
+  set gamma-cobb-douglas-e 0.9
+  set gamma-cobb-douglas-a 0.65
+  set beta-discrete-choices 1.8
+  set lambda-accessibility 0.001
   
   ; governance params
   set regional-decision-proba 0.5
-  set road-length 5
-  set #-explorations 10
-  set game-type "random"
+  set road-length 2
+  set #-explorations 25
+  ;set game-type "random"
+  set game-type "simple-nash"
   set infra-snapping-tolerance 2
+  set collaboration-cost 0.0001
+  set construction-cost 0.001 
+  set beta-dc-game 500
 
   ; transportation params
   set network-min-pace 1
-  set euclidian-min-pace 2
+  set euclidian-min-pace 5
   set congestion-price 50
   
  
   ; externalities
-  set with-externalities? false
-  set ext-employments-proportion-of-max 1
+  ;set with-externalities? false
+  set ext-employments-proportion-of-max 3
+  set ext-growth-factor 1
   
   
   

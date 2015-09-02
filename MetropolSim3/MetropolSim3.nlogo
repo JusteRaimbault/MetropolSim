@@ -13,7 +13,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw shell gradient]
+extensions[matrix table context nw shell gradient numanal]
 
 __includes [
   
@@ -138,6 +138,9 @@ globals[
   diff-actives
   diff-employments
   
+  
+  initial-max-acc
+  
   ; utility : cobb-douglas parameter
   ;gamma-cobb-douglas
   
@@ -176,6 +179,14 @@ globals[
   ;network-max-pace
   
   
+  
+  ;;;;;;;;;;;;;
+  ;; governance
+  ;;;;;;;;;;;;;
+  
+  collaborations-wanted
+  collaborations-realized
+  collaborations-expected
   
   
   
@@ -368,11 +379,11 @@ transportation-nodes-own[
 GRAPHICS-WINDOW
 346
 10
-881
-566
-10
-10
-25.0
+811
+496
+6
+6
+35.0
 1
 10
 1
@@ -382,10 +393,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--10
-10
--10
-10
+-6
+6
+-6
+6
 0
 0
 1
@@ -431,8 +442,8 @@ CHOOSER
 656
 patches-display
 patches-display
-"governance" "actives" "employments" "a-utility" "e-utility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-11
+"governance" "actives" "employments" "a-utility" "e-utility" "accessibility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
+5
 
 TEXTBOX
 11
@@ -616,7 +627,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-0.3
+0
 0.05
 1
 NIL
@@ -823,7 +834,7 @@ CHOOSER
 log-level
 log-level
 "DEBUG" "VERBOSE" "DEFAULT"
-2
+1
 
 SLIDER
 5
@@ -879,7 +890,7 @@ SLIDER
 #-explorations
 0
 1000
-15
+53
 1
 1
 NIL
@@ -894,7 +905,7 @@ lambda-accessibility
 lambda-accessibility
 0
 0.1
-0.0020
+0.0050
 0.001
 1
 NIL
@@ -933,10 +944,10 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-182
-411
-334
-446
+184
+483
+336
+518
 __________________
 20
 0.0
@@ -945,12 +956,12 @@ __________________
 CHOOSER
 186
 348
-333
+338
 393
 game-type
 game-type
-"random" "simple-nash"
-0
+"random" "simple-nash" "discrete-choices"
+2
 
 TEXTBOX
 174
@@ -1091,8 +1102,8 @@ SLIDER
 collaboration-cost
 collaboration-cost
 0
-0.01
-0.007519
+0.001
+6.0E-5
 1e-6
 1
 NIL
@@ -1116,8 +1127,8 @@ SLIDER
 ext-growth-factor
 ext-growth-factor
 0
-1
-1
+20
+11.8
 0.1
 1
 NIL
@@ -1268,6 +1279,54 @@ infra-snapping-tolerance
 1
 NIL
 HORIZONTAL
+
+SLIDER
+185
+430
+335
+463
+construction-cost
+construction-cost
+0
+1e-2
+0.0010
+1e-4
+1
+NIL
+HORIZONTAL
+
+SLIDER
+185
+466
+334
+499
+beta-dc-game
+beta-dc-game
+0
+1000
+500
+10
+1
+NIL
+HORIZONTAL
+
+PLOT
+986
+135
+1146
+255
+externality mean acc
+NIL
+NIL
+0.0
+2.0
+0.0
+1.0
+true
+false
+"clear-plot" ""
+PENS
+"default" 1.0 0 -16777216 true "" "if external-facility != 0 [plot (mean [current-accessibility] of patches with [member? number external-facility]) / initial-max-acc]"
 
 @#$#@#$#@
 ## WHAT IS IT?

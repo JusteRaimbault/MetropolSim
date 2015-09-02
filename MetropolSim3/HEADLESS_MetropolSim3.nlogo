@@ -13,7 +13,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw gradient]
+extensions[matrix table context nw gradient numanal]
 
 __includes [
   
@@ -182,6 +182,16 @@ globals[
   
   
   ;;;;;;;;;;;;;
+  ;; governance
+  ;;;;;;;;;;;;;
+  
+  collaborations-wanted
+  collaborations-realized
+  collaborations-expected
+  
+  
+  
+  ;;;;;;;;;;;;;
   ;; Cached distances matrices
   ;;
   ;;  updated through dynamic programming rules
@@ -273,9 +283,14 @@ globals[
   gamma-cobb-douglas-a
   gamma-cobb-douglas-e
   infra-snapping-tolerance
+  construction-cost
+  beta-dc-game
+  
+  initial-max-acc
   
   total-time-steps
   headless?
+  failed
   
   to-construct
 ]
@@ -378,10 +393,10 @@ transportation-nodes-own[
 GRAPHICS-WINDOW
 833
 27
-1137
-352
-10
-10
+1078
+240
+6
+6
 14.0
 1
 10
@@ -392,10 +407,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--10
-10
--10
-10
+-6
+6
+-6
+6
 0
 0
 1
