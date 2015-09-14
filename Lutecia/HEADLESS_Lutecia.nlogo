@@ -13,7 +13,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw shell gradient numanal]
+extensions[matrix table context nw gradient numanal]
 
 __includes [
   
@@ -76,11 +76,12 @@ __includes [
   
   "indicators.nls"
   
+  
   ;;;;;;;;;;
-  ;; visual exploration
+  ; Experiments
   ;;;;;;;;;;
   
-  "exploration.nls"
+  "experiment.nls"
   
   
   ;;;;;;;;;;
@@ -90,8 +91,6 @@ __includes [
   ; Q : package utils subpackages or all utils to have a simpler use ?
   
   "utils/math/SpatialKernels.nls"
-  "utils/math/Statistics.nls"
-  "utils/math/EuclidianDistanceUtilities.nls"
   "utils/misc/List.nls"
   "utils/misc/Types.nls"
   "utils/misc/Matrix.nls"
@@ -104,13 +103,14 @@ __includes [
   "utils/io/Logger.nls"
   "utils/io/FileUtilities.nls"
   "utils/misc/String.nls"
+  "utils/math/Statistics.nls"
+  "utils/math/EuclidianDistanceUtilities.nls"
   
   ;;;;;;;;;;;
   ;; Tests
   ;;;;;;;;;;;
   
   "test/test-distances.nls"
-  "test/test-transportation.nls"
   
 ]
 
@@ -138,9 +138,6 @@ globals[
   diff-actives
   diff-employments
   
-  
-  initial-max-acc
-  
   ; utility : cobb-douglas parameter
   ;gamma-cobb-douglas
   
@@ -151,18 +148,20 @@ globals[
   regional-authority
   
   
-  ;; list of patches for the external facility
+  
+  positions-file
+  ext-file
+  setup-type
+  
   external-facility
   
-  ;; coordinates of mayors, taken from setup file
   mayors-coordinates
-  
-  ;; position of ext patch
   ext-position
   
-  ;; path to the setup files
-  ;positions-file
-  ext-file
+  
+  with-externalities?
+  
+  ext-growth-factor
   
   ;;;;;;;;;;;;;
   ;; Transportation
@@ -177,6 +176,8 @@ globals[
   
   ;; maximal pace (inverse of speed) in the transportation network
   ;network-max-pace
+  
+  lambda-flows
   
   
   
@@ -207,10 +208,6 @@ globals[
   ;  - with congestion in network -
   effective-distance-matrix
   
-  ;;
-  ; Cached access patches to network, i.e. closest patch belonging to nw
-  ;  @type table
-  ;   number -> number of access
   nw-access-table
   
   ;; cached shortest paths -> updated same time as distance
@@ -220,8 +217,6 @@ globals[
   network-shortest-paths
   
   ;; list of nw patches
-  ;  @type list
-  ;  List of network patches number
   nw-patches
   
   ;; number of patches
@@ -231,15 +226,7 @@ globals[
   closest-nw-inters
   
   ;; network intersections
-  ;  @type list
-  ;  List of intersection patches numbers
   nw-inters
-  
-  ;; network clusters
-  network-clusters
-  
-  ;; connexion between clusters
-  network-clusters-connectors
   
   ; overall
   ; stored as table (num_patch_1,num_patch_2) -> [[i,i1],[i1,i2],...,[in,j]] where couples are either (void-nw) or (nw-nw)
@@ -249,6 +236,9 @@ globals[
   ;;
   ; maximal distance in the world
   dmax
+  
+  network-clusters
+  network-clusters-connectors
   
   
   
@@ -266,14 +256,44 @@ globals[
   
   gridor
   
-  ;; infra constructed by hand
-  to-construct
   
+  
+  ;;;;;;;;;;;;;;;
+  ;;;;;;;;;;;;;
   ;; HEADLESS
-  headless?
+  actives-max
+  employments-max
+  #-initial-territories
+  actives-spatial-dispersion
+  employments-spatial-dispersion
+  gamma-cobb-douglas
+  beta-discrete-choices
+  lambda-accessibility
+  regional-decision-proba
+  road-length
+  #-explorations
+  log-level
+  patches-display ; no init in headless
+  network-min-pace
+  euclidian-min-pace
+  congestion-price
+  game-type
+  collaboration-cost
+  ext-employments-proportion-of-max
+  gamma-cobb-douglas-a
+  gamma-cobb-douglas-e
+  infra-snapping-tolerance
+  construction-cost
+  beta-dc-game
   
+  initial-max-acc
+  
+  total-time-steps
+  headless?
+  failed
+  
+  to-construct
 ]
-
 
 
 patches-own [
@@ -296,10 +316,6 @@ patches-own [
   employments
   
   
-  
-  
-  
-  
   ;;;;;
   ;; utilities and accessibilities
   ;;;;;
@@ -310,9 +326,8 @@ patches-own [
   ; accessibility of actives to employments
   e-to-a-accessibility
    
-  ; previous and current cumulated accessibilities
   prev-accessibility
-  current-accessibility
+  current-accessibility 
    
   ; travel distances
   a-to-e-distance
@@ -365,7 +380,6 @@ transportation-links-own [
   ; speed in the link, deduced from capacity and congestion
   speed
   
-  ; tick on which the infra has been constructed
   age
   
 ]
@@ -377,13 +391,13 @@ transportation-nodes-own[
 ]
 @#$#@#$#@
 GRAPHICS-WINDOW
-346
-10
-811
-496
+833
+27
+1078
+240
 6
 6
-35.0
+14.0
 1
 10
 1
@@ -402,931 +416,6 @@ GRAPHICS-WINDOW
 1
 ticks
 30.0
-
-SLIDER
-9
-33
-140
-66
-#-initial-territories
-#-initial-territories
-0
-5
-2
-1
-1
-NIL
-HORIZONTAL
-
-BUTTON
-9
-611
-75
-644
-setup
-setup
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-CHOOSER
-380
-611
-499
-656
-patches-display
-patches-display
-"governance" "actives" "employments" "a-utility" "e-utility" "accessibility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-5
-
-TEXTBOX
-11
-15
-161
-33
-Setup parameters
-11
-0.0
-1
-
-TEXTBOX
-9
-161
-159
-179
-Runtime parameters
-11
-0.0
-1
-
-SLIDER
-9
-71
-184
-104
-actives-spatial-dispersion
-actives-spatial-dispersion
-0
-100
-1
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-8
-105
-184
-138
-employments-spatial-dispersion
-employments-spatial-dispersion
-0
-10
-0.8
-0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-185
-71
-294
-104
-actives-max
-actives-max
-0
-1000
-500
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-184
-105
-294
-138
-employments-max
-employments-max
-0
-1000
-500
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-0
-203
-178
-236
-gamma-cobb-douglas-a
-gamma-cobb-douglas-a
-0
-1
-0.9
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-3
-273
-172
-306
-beta-discrete-choices
-beta-discrete-choices
-0
-2
-1.8
-0.05
-1
-NIL
-HORIZONTAL
-
-BUTTON
-136
-611
-191
-644
-go
-ifelse ticks < total-time-steps [\n  go\n][stop]
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-0
-
-PLOT
-1096
-10
-1324
-174
-convergence
-NIL
-NIL
-0.0
-2.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -5298144 true "" "plot diff-employments"
-"pen-1" 1.0 0 -12087248 true "" "plot diff-actives"
-
-OUTPUT
-910
-477
-1368
-833
-10
-
-TEXTBOX
-6
-186
-156
-204
-LUTI
-11
-0.0
-1
-
-TEXTBOX
-188
-184
-338
-202
-Governance
-11
-0.0
-1
-
-SLIDER
-184
-203
-333
-236
-regional-decision-proba
-regional-decision-proba
-0
-1
-0
-0.05
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-174
-202
-189
-233
-|
-25
-0.0
-1
-
-TEXTBOX
-174
-223
-189
-254
-|
-25
-0.0
-1
-
-TEXTBOX
-174
-245
-189
-276
-|
-25
-0.0
-1
-
-SLIDER
-5
-372
-170
-405
-network-min-pace
-network-min-pace
-0
-10
-1
-1
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-4
-331
-207
-358
-_________________
-20
-0.0
-1
-
-TEXTBOX
-5
-357
-155
-375
-Transportation
-11
-0.0
-1
-
-TEXTBOX
-174
-267
-189
-298
-|
-25
-0.0
-1
-
-BUTTON
-1398
-19
-1511
-52
-setup test nw
-setup-test-nw-mat
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1398
-55
-1453
-88
-grid
-test-nw-mat-grid-nw
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1399
-93
-1509
-126
-test shortest
-test-shortest-path
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-MONITOR
-1329
-17
-1397
-62
-nw patches
-length nw-patches
-17
-1
-11
-
-MONITOR
-1338
-65
-1392
-110
-eff paths
-length table:keys network-shortest-paths
-17
-1
-11
-
-MONITOR
-1339
-113
-1390
-158
-inters
-length nw-inters
-17
-1
-11
-
-BUTTON
-1399
-129
-1493
-162
-test inters
-test-closest-inter
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1454
-55
-1517
-88
-rnd
-test-nw-mat-random-nw
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-CHOOSER
-501
-611
-639
-656
-log-level
-log-level
-"DEBUG" "VERBOSE" "DEFAULT"
-1
-
-SLIDER
-5
-408
-169
-441
-euclidian-min-pace
-euclidian-min-pace
-1
-50
-5
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-5
-442
-169
-475
-congestion-price
-congestion-price
-0
-10
-1
-0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-184
-241
-333
-274
-road-length
-road-length
-0
-20
-2
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-186
-313
-334
-346
-#-explorations
-#-explorations
-0
-1000
-100
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-4
-307
-171
-340
-lambda-accessibility
-lambda-accessibility
-0
-0.1
-0.0050
-0.001
-1
-NIL
-HORIZONTAL
-
-BUTTON
-908
-439
-1002
-472
-indicators
-compute-indicators
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-SLIDER
-197
-611
-321
-644
-total-time-steps
-total-time-steps
-0
-20
-3
-1
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-184
-483
-336
-518
-__________________
-20
-0.0
-1
-
-CHOOSER
-186
-348
-338
-393
-game-type
-game-type
-"random" "simple-nash" "discrete-choices"
-2
-
-TEXTBOX
-174
-289
-189
-321
-|
-25
-0.0
-1
-
-TEXTBOX
-174
-312
-192
-342
-|
-25
-0.0
-1
-
-PLOT
-1098
-177
-1326
-353
-accessibility
-NIL
-NIL
-0.0
-2.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -12186836 true "" "plot mean-accessibility patches"
-
-SLIDER
-5
-477
-168
-510
-lambda-flows
-lambda-flows
-0
-1
-1
-0.005
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-13
-578
-200
-622
-__________________
-20
-0.0
-1
-
-BUTTON
-1336
-166
-1417
-199
-test dist
-setup\ntest-network-effect (patches with [pxcor = 0])\n;check-effective-distance 1180 684
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-382
-660
-457
-693
-update
-compute-patches-variables\ncolor-patches
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1139
-441
-1221
-474
-test connex
-test-connex-components
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-1336
-201
-1409
-234
-nw effect
-test-network-effect patches
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-SLIDER
-185
-395
-333
-428
-collaboration-cost
-collaboration-cost
-0
-0.001
-5.3E-5
-1e-6
-1
-NIL
-HORIZONTAL
-
-CHOOSER
-143
-21
-235
-66
-setup-type
-setup-type
-"random" "from-file"
-0
-
-SLIDER
-7
-550
-152
-583
-ext-growth-factor
-ext-growth-factor
-0
-20
-11.8
-0.1
-1
-NIL
-HORIZONTAL
-
-BUTTON
-78
-611
-133
-644
-go
-go
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-SWITCH
-5
-514
-151
-547
-with-externalities?
-with-externalities?
-0
-1
--1000
-
-INPUTBOX
-237
-10
-315
-70
-positions-file
-setup/triangle.csv
-1
-0
-String
-
-BUTTON
-1006
-438
-1098
-471
-construct
-if mouse-down? [\n  if length to-construct < 2[\n    set to-construct lput (list mouse-xcor mouse-ycor) to-construct\n  ]\n  if length to-construct = 2[\n    construct-infrastructure (list to-construct) save-nw-config\n    compute-patches-variables\n    update-display\n    set to-construct []\n    verbose (word \"mean-travel-distance : \" mean-travel-distance)\n    stop\n  ]\n  wait 0.2\n  \n]
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-SLIDER
-153
-513
-266
-546
-ext-employments-proportion-of-max
-ext-employments-proportion-of-max
-0
-5
-3
-0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-0
-238
-177
-271
-gamma-cobb-douglas-e
-gamma-cobb-douglas-e
-0
-1
-0.65
-0.05
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-382
-591
-532
-609
-Display
-11
-0.0
-1
-
-BUTTON
-9
-647
-72
-680
-NIL
-luti
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-PLOT
-862
-10
-1093
-173
-externalities
-NIL
-NIL
-0.0
-2.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot externality-employments"
-
-SLIDER
-185
-277
-335
-310
-infra-snapping-tolerance
-infra-snapping-tolerance
-0
-10
-2
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-185
-430
-335
-463
-construction-cost
-construction-cost
-0
-1e-2
-0.0010
-1e-4
-1
-NIL
-HORIZONTAL
-
-SLIDER
-185
-466
-334
-499
-beta-dc-game
-beta-dc-game
-0
-5000
-400
-10
-1
-NIL
-HORIZONTAL
-
-PLOT
-863
-179
-1093
-355
-externality mean acc
-NIL
-NIL
-0.0
-2.0
-0.0
-0.1
-true
-false
-"clear-plot" ""
-PENS
-"default" 1.0 0 -16777216 true "" "if external-facility != 0 [plot (mean [current-accessibility] of patches with [member? number external-facility]) / initial-max-acc]"
 
 @#$#@#$#@
 ## WHAT IS IT?
