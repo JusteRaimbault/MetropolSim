@@ -7,13 +7,13 @@
 ;;   - simplified population structure (one csp)
 ;;   - game-theoretical governance management
 ;;
-;; TODO - possible extensions :
+;; Possible extensions (v4) :
 ;;    * add different transportation modes ?
 ;;    * add csp ? not prioritary.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw shell gradient numanal]
+extensions[matrix table context nw shell gradient numanal gis]
 
 __includes [
   
@@ -163,6 +163,13 @@ globals[
   ;; path to the setup files
   ;positions-file
   ext-file
+  
+  ;; GIS setup
+  gis-network-file
+  gis-extent-file
+  gis-centers-file
+  
+  
   
   ;;;;;;;;;;;;;
   ;; Transportation
@@ -379,11 +386,11 @@ transportation-nodes-own[
 GRAPHICS-WINDOW
 346
 10
-811
-496
-6
-6
-35.0
+839
+524
+10
+10
+23.0
 1
 10
 1
@@ -393,10 +400,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--6
-6
--6
-6
+-10
+10
+-10
+10
 0
 0
 1
@@ -412,7 +419,7 @@ SLIDER
 #-initial-territories
 0
 5
-2
+3
 1
 1
 NIL
@@ -443,7 +450,7 @@ CHOOSER
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "accessibility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-5
+9
 
 TEXTBOX
 11
@@ -627,7 +634,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-0
+1
 0.05
 1
 NIL
@@ -875,7 +882,7 @@ road-length
 road-length
 0
 20
-2
+3
 1
 1
 NIL
@@ -890,7 +897,7 @@ SLIDER
 #-explorations
 0
 1000
-100
+23
 1
 1
 NIL
@@ -937,7 +944,7 @@ total-time-steps
 total-time-steps
 0
 20
-3
+4
 1
 1
 NIL
@@ -1116,8 +1123,8 @@ CHOOSER
 66
 setup-type
 setup-type
-"random" "from-file"
-0
+"random" "from-file" "gis"
+2
 
 SLIDER
 7
@@ -1158,7 +1165,7 @@ SWITCH
 547
 with-externalities?
 with-externalities?
-0
+1
 1
 -1000
 
