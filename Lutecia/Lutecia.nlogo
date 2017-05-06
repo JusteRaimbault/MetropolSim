@@ -82,6 +82,12 @@ __includes [
   
   "exploration.nls"
   
+  ;;;;;;;;
+  ;; experiments
+  ;;;;;;;;
+  "experiments.nls"
+  
+  
   
   ;;;;;;;;;;
   ;; utils
@@ -111,6 +117,8 @@ __includes [
   
   "test/test-distances.nls"
   "test/test-transportation.nls"
+  "test/test-experiments.nls"
+  
   
 ]
 
@@ -173,6 +181,8 @@ globals[
   gis-centers-file
   gis-population-raster-file
   gis-sea-file
+  gis-economic-areas-file
+  gis-governed-patches-file
   
   ;;;;;;;;;;;;;
   ;; Transportation
@@ -261,6 +271,8 @@ globals[
   dmax
   
   
+  target-network-file
+  
   
   ;;;;;;;;;;;;;
   ;; Utils
@@ -281,6 +293,8 @@ globals[
   
   ;; HEADLESS
   headless?
+  
+  failed
   
 ]
 
@@ -380,6 +394,8 @@ transportation-links-own [
   ; tick on which the infra has been constructed
   age
   
+  status
+  
 ]
 
 ;; nodes of the transportation network
@@ -455,7 +471,7 @@ CHOOSER
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "accessibility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-1
+0
 
 TEXTBOX
 11
@@ -560,8 +576,8 @@ SLIDER
 beta-discrete-choices
 beta-discrete-choices
 0
-2
-1.8
+5
+1.25
 0.05
 1
 NIL
@@ -639,7 +655,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-1
+0.2
 0.05
 1
 NIL
@@ -902,7 +918,7 @@ SLIDER
 #-explorations
 0
 1000
-10
+21
 1
 1
 NIL
@@ -949,7 +965,7 @@ total-time-steps
 total-time-steps
 0
 20
-10
+6
 1
 1
 NIL
@@ -1128,8 +1144,8 @@ CHOOSER
 114
 setup-type
 setup-type
-"random" "from-file" "gis" "gis-raster"
-2
+"random" "from-file" "gis-synthetic" "gis"
+3
 
 SLIDER
 7
@@ -1349,7 +1365,7 @@ seed
 seed
 -100000
 100000
-1
+7
 1
 1
 NIL
@@ -1369,6 +1385,28 @@ world-size
 1
 NIL
 HORIZONTAL
+
+SWITCH
+235
+75
+339
+108
+initial-nw?
+initial-nw?
+1
+1
+-1000
+
+SWITCH
+160
+184
+338
+217
+setup-from-world-file?
+setup-from-world-file?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
