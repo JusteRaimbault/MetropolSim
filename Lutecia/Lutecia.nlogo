@@ -1,7 +1,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;
-;; MetropolSim v3.0
 ;;
+;; LUTECIA Model
+;;
+;; (MetropolSim v3.0)
 ;; Major changes since v2
 ;;   - matrix dynamic shortest path (euclidian and nw) computation
 ;;   - simplified population structure (one csp)
@@ -13,7 +15,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-extensions[matrix table context nw shell gradient numanal gis]
+extensions[matrix table context nw shell gradient numanal gis morphology]
 
 __includes [
   
@@ -296,11 +298,25 @@ globals[
   
   failed
   
+  
+  link-distance-function
+  
+  tracked-indicators
+  history-indicators
+  
 ]
 
 
 
 patches-own [
+  
+  ; number of actives on the patch
+  actives
+  
+  ; number of jobs on the patch
+  employments
+  
+  
   
   ; number of the patch (used as index in distance matrices)
   number
@@ -312,14 +328,6 @@ patches-own [
   ; do not need mobile agents as deterministic evolution, considering at this time scale that random effect is averaged
   ;  on the contrary to transportation infrastructure evolution, that evolves at a greater scale.
   ;  -> patch variables and not agents
-  
-  ; number of actives on the patch
-  actives
-  
-  ; number of jobs on the patch
-  employments
-  
-  
   
   
   
@@ -403,15 +411,20 @@ breed[transportation-nodes transportation-node]
 
 transportation-nodes-own[
 ]
+
+
+undirected-link-breed[ghost-transportation-links ghost-transportation-link]
+
+breed[ghost-transportation-nodes ghost-transportation-node]
 @#$#@#$#@
 GRAPHICS-WINDOW
 346
 10
-800
-485
-15
-15
-14.333333333333334
+785
+470
+7
+7
+28.666666666666668
 1
 10
 1
@@ -421,10 +434,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--15
-15
--15
-15
+-7
+7
+-7
+7
 0
 0
 1
@@ -440,7 +453,7 @@ SLIDER
 #-initial-territories
 0
 5
-5
+1
 1
 1
 NIL
@@ -471,7 +484,7 @@ CHOOSER
 patches-display
 patches-display
 "governance" "actives" "employments" "a-utility" "e-utility" "accessibility" "a-to-e-accessibility" "e-to-a-accessibility" "congestion" "mean-effective-distance" "lbc-effective-distance" "center-effective-distance" "lbc-network-distance"
-0
+1
 
 TEXTBOX
 11
@@ -655,7 +668,7 @@ regional-decision-proba
 regional-decision-proba
 0
 1
-0.2
+1
 0.05
 1
 NIL
@@ -903,7 +916,7 @@ road-length
 road-length
 0
 20
-3
+2
 1
 1
 NIL
@@ -918,7 +931,7 @@ SLIDER
 #-explorations
 0
 1000
-21
+38
 1
 1
 NIL
@@ -965,7 +978,7 @@ total-time-steps
 total-time-steps
 0
 20
-6
+20
 1
 1
 NIL
@@ -1145,7 +1158,7 @@ CHOOSER
 setup-type
 setup-type
 "random" "from-file" "gis-synthetic" "gis"
-3
+0
 
 SLIDER
 7
@@ -1242,7 +1255,7 @@ gamma-cobb-douglas-e
 gamma-cobb-douglas-e
 0
 1
-0.65
+0.85
 0.05
 1
 NIL
@@ -1380,7 +1393,7 @@ world-size
 world-size
 0
 50
-30
+15
 1
 1
 NIL
@@ -1393,7 +1406,7 @@ SWITCH
 108
 initial-nw?
 initial-nw?
-1
+0
 1
 -1000
 

@@ -14,7 +14,7 @@ val exploration =  ExplorationTask(
     (collcost in (0.00005 to 0.00013 by 0.00002))
   ) withIndex id )*/
   ((LHS (
-    80,
+    2000,
     lambdaacc in Range(0.001,0.01),
     euclpace in Range(2.5,10.0),
     constrcost in Range(0.0005,0.005),
@@ -37,8 +37,8 @@ val indics_hook = AppendToCSVFileHook(workDirectory / "exploration" / ((new Simp
 
 
 
-//val local = LocalEnvironment(2)
+//val local = LocalEnvironment(5)
 val grid = EGIEnvironment("vo.complex-systems.eu",openMOLEMemory = 4000 megabytes)
 
 //exploration -< (model on local hook indics_hook)
-exploration -< (model on grid by 20 hook indics_hook)
+exploration -< (model on grid by 2 hook indics_hook)

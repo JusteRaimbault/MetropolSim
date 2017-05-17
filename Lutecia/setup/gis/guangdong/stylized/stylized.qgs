@@ -12,16 +12,16 @@
     <layer-tree-layer expanded="1" checked="Qt::Checked" id="nw_simpl20170223120644040" name="nw_simpl">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="network_planned20161202190700785" name="network_planned">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="network_planned20161202190700785" name="network_planned">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="network20161202190309183" name="network">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="network20161202190309183" name="network">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="highway_P020100810404727186271_georef20170506214359762" name="highway_P020100810404727186271_georef">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Checked" id="governed20170504155157374" name="governed">
-      <customproperties/>
-    </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="highway_P020100810404727186271_georef20170506214359762" name="highway_P020100810404727186271_georef">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Checked" id="sea20161203152901257" name="sea">
@@ -46,10 +46,10 @@
   <mapcanvas>
     <units>degrees</units>
     <extent>
-      <xmin>1480.4394491731375183</xmin>
-      <ymin>-1499.01283989529315477</ymin>
-      <xmax>2124.0442415370771414</xmax>
-      <ymax>-910.69677185694877153</ymax>
+      <xmin>1053.16038650713835523</xmin>
+      <ymin>-2016.73097976902863593</ymin>
+      <xmax>2340.36997123501805618</xmax>
+      <ymax>-840.09884369233986945</ymax>
     </extent>
     <rotation>0</rotation>
     <projections>1</projections>
@@ -114,24 +114,24 @@
         <legendlayerfile isInOverview="0" layerid="nw_simpl20170223120644040" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="network_planned" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="network_planned" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="network_planned20161202190700785" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="network_planned20161202190700785" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="network" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="network" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="network20161202190309183" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="network20161202190309183" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="highway_P020100810404727186271_georef" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="highway_P020100810404727186271_georef20170506214359762" visible="0"/>
       </filegroup>
     </legendlayer>
     <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="governed" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="governed20170504155157374" visible="1"/>
-      </filegroup>
-    </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="highway_P020100810404727186271_georef" showFeatureCount="0">
-      <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="highway_P020100810404727186271_georef20170506214359762" visible="1"/>
       </filegroup>
     </legendlayer>
     <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="sea" showFeatureCount="0">

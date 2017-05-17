@@ -9,10 +9,18 @@
 ;-> hierarchy case, population, evol hierarchy.  -- TODO --
 
 
+to update-indicators
+  foreach tracked-indicators [
+    let val run-result ?
+    table:put history-indicators ? (lput (table:get history-indicators ?) val)
+  ]
+end
+
+
 to compute-indicators
   output-print (word "mean-accessibility : " mean-accessibility patches)
   output-print (word "mean-travel-distance : " mean-travel-distance)
-  output-print (word "actives-entropy : " actives-entropy)
+  output-print (word "actives-entropy : " entropy-actives)
   output-print (word "collaboration wanted : " wanted-collaboration-rate)
   output-print (word "collaboration realized : " realized-collaboration-rate)
   output-print (word "externality-decrep : " externality-decrepitude)
@@ -75,17 +83,56 @@ to-report stability
 end
 
 
-;; entropy of distribution of actives
-to-report actives-entropy
-  let atot sum [actives] of patches
-  report (- 1 / (ln count patches) * sum [actives / atot * ln (actives / atot)] of patches)
+
+
+;;;;
+;; Morphological indicators
+
+
+to-report moran-actives
+  report morphology:moran 0
 end
 
-;; entropy of distribution of employments
-to-report employments-entropy
-  let etot sum [employments] of patches
-  report (- 1 / (ln count patches) * sum [employments / etot * ln (employments / etot)] of patches)
+to-report entropy-actives
+  report morphology:entropy 0
 end
+
+to-report slope-actives
+  report first morphology:slope 0
+end
+
+to-report slope-rsquared-actives
+  report last morphology:slope 0
+end
+
+to-report mean-distance-actives
+  report morphology:distance 0
+end
+
+to-report moran-employments
+  report morphology:moran 1
+end
+
+to-report entropy-employments
+  report morphology:entropy 1
+end
+
+to-report slope-employments
+  report first morphology:slope 1
+end
+
+to-report slope-rsquared-employments
+  report last morphology:slope 1
+end
+
+to-report mean-distance-employments
+  report morphology:distance 1
+end
+
+
+
+
+
 
 
 
@@ -130,6 +177,32 @@ end
 to-report externality-decrepitude
   report externality-employments / (employments-max * ext-employments-proportion-of-max)
 end
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+;; DEPRECATED using morphology extension
+
+;; entropy of distribution of actives
+;to-report actives-entropy
+;  let actives-patches patches with [actives > 0]
+;  let atot sum [actives] of actives-patches
+;  report (- 1 / (ln count patches) * sum [actives / atot * ln (actives / atot)] of actives-patches)
+;end
+
+;; entropy of distribution of employments
+;to-report employments-entropy
+;  let employment-patches patches with [employments > 0]
+;  let etot sum [employments] of employment-patches
+;  report (- 1 / (ln count patches) * sum [employments / etot * ln (employments / etot)] of employment-patches)
+;end  
+  
   
 
 

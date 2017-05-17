@@ -428,8 +428,6 @@ breed[ghost-transportation-nodes ghost-transportation-node]
 
 
 
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 833

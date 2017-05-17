@@ -84,6 +84,7 @@ end
 ; get a geometrical distance measure between two networks
 ;  -> area of non-crossing polygons ?
 to-report network:network-distances [e1 e2]
+  if count e1 = 0 or count e2 = 0 []
   let res 0
   ask e1 [
     let dmin network:link-distance self (one-of e2)
