@@ -12,7 +12,7 @@
 to update-indicators
   foreach tracked-indicators [
     let val run-result ?
-    table:put history-indicators ? (lput (table:get history-indicators ?) val)
+    table:put history-indicators ? (lput val (table:get history-indicators ?))
   ]
 end
 
@@ -26,6 +26,26 @@ to compute-indicators
   output-print (word "externality-decrep : " externality-decrepitude)
   ;output-print (word "mean-congestion : " mean-congestion)
 end
+
+to compute-network-indicators
+  network:cache-nw-measures
+  ; total-nw-length mean-relative-speed mean-closeness-centrality mean-bw-centrality mean-path-length nw-diameter
+  output-print (word "total-nw-length : " total-nw-length)
+  output-print (word "mean-relative-speed : " mean-relative-speed)
+  output-print (word "mean-closeness-centrality : " mean-closeness-centrality)
+  output-print (word "mean-bw-centrality : " mean-bw-centrality)
+  output-print (word "mean-path-length : " mean-path-length)
+  output-print (word "nw-diameter : " nw-diameter)
+end
+
+
+;;
+; TS indicators
+to-report ts-indicator [indic]
+  report table:get history-indicators indic
+end
+
+
 
 
 ;;
@@ -76,6 +96,10 @@ to-report mean-congestion
   report mean [congestion] of transportation-links
 end
 
+to-report mean-patch-congestion
+  report mean patches-congestion
+end
+
 
 ;; last variability of relocation process
 to-report stability
@@ -83,6 +107,17 @@ to-report stability
 end
 
 
+to-report mean-flow
+  report matrix:mean flow-matrix
+end
+
+to-report min-flow
+  report matrix:min flow-matrix
+end
+
+to-report max-flow
+  report matrix:min flow-matrix
+end
 
 
 ;;;;
@@ -129,6 +164,81 @@ to-report mean-distance-employments
   report morphology:distance 1
 end
 
+
+;;
+; mean distance to centre (to measure sprawl)
+to-report mean-distance-to-centre-actives
+  let atot sum [actives] of patches
+  report sum [actives / atot * distance (patch 0 0)] of patches
+end
+
+to-report mean-distance-to-centre-employments
+  let etot sum [employments] of patches
+  report sum [employments / etot * distance (patch 0 0)] of patches
+end
+
+to-report center-actives-prop
+  report [actives] of patch 0 0 / sum [actives] of patches
+end
+
+
+to-report center-employments-prop
+  report [employments] of patch 0 0 / sum [employments] of patches
+end
+
+
+
+;;
+;  Network indicators
+
+
+to-report table-values [t]
+  let res []
+  foreach table:keys t [set res lput table:get t ? res]
+  report res
+end
+
+;;
+; nw diameter
+;  Normalized by world diag
+to-report nw-diameter
+  let diag sqrt (world-width ^ 2 + world-height ^ 2)
+  report max map [sum map [[transportation-link-length] of ?] ?] (table-values shortest-paths) / diag
+end
+
+
+;;
+; mean path length
+;  Normalized by world diagonal
+to-report mean-path-length
+  let diag sqrt (world-width ^ 2 + world-height ^ 2)
+  report (mean map [sum map [[transportation-link-length] of ?] ?] (table-values shortest-paths)) / diag
+end
+
+;;
+;  bw centrality, normalized by number of paths considered
+to-report mean-bw-centrality
+  let n count transportation-nodes
+  report (mean [bw-centrality] of transportation-links) * 2 / (n * (n - 1))
+end
+
+to-report mean-closeness-centrality
+  let n count transportation-nodes
+  report (mean [transportation-node-closeness-centrality] of transportation-nodes) / n
+end
+
+
+;;
+; mean relative speed, already normalized
+to-report mean-relative-speed
+  report mean table-values nw-relative-speeds
+end
+
+;;
+; nw length -> not normalized
+to-report total-nw-length
+  report sum [road-length] of transportation-links
+end
 
 
 
