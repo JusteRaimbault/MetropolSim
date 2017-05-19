@@ -202,6 +202,7 @@ end
 ; nw diameter
 ;  Normalized by world diag
 to-report nw-diameter
+  if count transportation-nodes = 0 [report 0]
   let diag sqrt (world-width ^ 2 + world-height ^ 2)
   report max map [sum map [[transportation-link-length] of ?] ?] (table-values shortest-paths) / diag
 end
@@ -211,6 +212,7 @@ end
 ; mean path length
 ;  Normalized by world diagonal
 to-report mean-path-length
+  if count transportation-nodes = 0 [report 0]
   let diag sqrt (world-width ^ 2 + world-height ^ 2)
   report (mean map [sum map [[transportation-link-length] of ?] ?] (table-values shortest-paths)) / diag
 end
@@ -218,12 +220,12 @@ end
 ;;
 ;  bw centrality, normalized by number of paths considered
 to-report mean-bw-centrality
-  let n count transportation-nodes
+  let n count transportation-nodes if n = 0 [report 0]
   report (mean [bw-centrality] of transportation-links) * 2 / (n * (n - 1))
 end
 
 to-report mean-closeness-centrality
-  let n count transportation-nodes
+  let n count transportation-nodes if n = 0 [report 0]
   report (mean [transportation-node-closeness-centrality] of transportation-nodes) / n
 end
 
@@ -231,12 +233,14 @@ end
 ;;
 ; mean relative speed, already normalized
 to-report mean-relative-speed
+  if count transportation-nodes = 0 [report 0]
   report mean table-values nw-relative-speeds
 end
 
 ;;
 ; nw length -> not normalized
 to-report total-nw-length
+  if count transportation-nodes = 0 [report 0]
   report sum [road-length] of transportation-links
 end
 

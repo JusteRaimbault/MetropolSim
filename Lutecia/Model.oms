@@ -72,8 +72,8 @@ val cmds = List(
 )
 
 val model = NetLogo5Task.workspace(workDirectory,"HEADLESS_Lutecia.nlogo",cmds) set(
-  inputs += (regionalproba,lambdaAcc,euclpace,game,constrcost,collcost,gammaCDA,gammaCDE,betaDC,evolveNetwork,targetNetwork,setupType,finalTime,replication,id),
-  outputs += (regionalproba,lambdaAcc,euclpace,game,constrcost,collcost,gammaCDA,gammaCDE,betaDC,evolveNetwork,targetNetwork,setupType,finalTime,replication,id),
+  inputs += (regionalproba,lambdaAcc,euclpace,game,constrcost,collcost,gammaCDA,gammaCDE,betaDC,evolveNetwork,targetNetwork,setupType,synthConfFile,finalTime,replication,id),
+  outputs += (regionalproba,lambdaAcc,euclpace,game,constrcost,collcost,gammaCDA,gammaCDE,betaDC,evolveNetwork,targetNetwork,setupType,synthConfFile,finalTime,replication,id),
   netLogoOutputs += ("ts-indicator \"mean-accessibility patches\"", accessibility),
   netLogoOutputs += ("ts-indicator \"mean-travel-distance\"", traveldistance),
   netLogoOutputs += ("ts-indicator \"stability\"",stabilityTS),
